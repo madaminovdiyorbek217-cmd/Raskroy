@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн-раскрой плитных материалов</title>
+    <meta name="description" content="Бесплатный онлайн-раскрой ЛДСП, МДФ и фанеры: карты раскроя, расчёт листов, кромки и длины реза. Работает в браузере, данные остаются у вас." data-i18n-attr="content:meta.desc">
+    <meta name="theme-color" content="#081327">
+
+    <!-- ВАЖНО: замените YOUR-DOMAIN.com на адрес вашего сайта -->
+    <link rel="canonical" href="https://YOUR-DOMAIN.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:url" content="https://YOUR-DOMAIN.com/">
+    <meta property="og:title" content="Онлайн-раскрой плитных материалов" data-i18n-attr="content:meta.title">
+    <meta property="og:description" content="Карты раскроя ЛДСП, МДФ и фанеры прямо в браузере: листы, кромка, длина реза." data-i18n-attr="content:meta.ogdesc">
+
+    <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
+
+    <link rel="stylesheet" href="./css/reset.css?v=20">
+    <link rel="stylesheet" href="./css/style.css?v=20">
+
+    <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="application-name" content="Раскрой онлайн">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Раскрой">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <script src="./js/theme-init.js?v=20"></script>
+</head>
+
+<body class="rk-page">
+    <a class="skip-link" href="#main" data-i18n="skip">Перейти к содержимому</a>
+
+    <header class="site-header">
+        <div class="container site-header-row">
+            <a href="./" class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><rect class="lg-bg" width="64" height="64" rx="16"/><path class="lg-fg" d="M15 18h34v28H15zM15 32h22M37 18v28M37 39h12"/></svg><span data-i18n="brand">Раскрой онлайн</span></a>
+            <nav class="site-nav" aria-label="Разделы" data-i18n-attr="aria-label:nav.aria"><a class="only-plates" href="#rk-h-mat" data-i18n="nav.mat">Материалы</a><a class="only-plates" href="#rk-h-parts" data-i18n="nav.parts">Детали</a><a class="only-plates" href="#rk-h-res" data-i18n="nav.res">Результат</a><a class="only-plates" href="#rk-h-works" data-i18n="nav.works">Работы</a><a class="only-fabric" href="#fb-h-set" data-i18n="nav.fb.set">Ткань</a><a class="only-fabric" href="#fb-h-parts" data-i18n="nav.parts">Детали</a><a class="only-fabric" href="#fb-h-res" data-i18n="nav.res">Результат</a></nav>
+            <div class="lang-switch" role="radiogroup" aria-label="Язык" data-i18n-attr="aria-label:lang.aria">
+                <button type="button" role="radio" data-lang-set="ru" aria-checked="false" title="Русский" lang="ru">RU</button>
+                <button type="button" role="radio" data-lang-set="en" aria-checked="false" title="English" lang="en">EN</button>
+                <button type="button" role="radio" data-lang-set="uz" aria-checked="false" title="O‘zbekcha" lang="uz">UZ</button>
+            </div>
+            <div class="theme-switch" role="radiogroup" aria-label="Тема оформления" data-i18n-attr="aria-label:theme.aria">
+                <button type="button" role="radio" data-set-theme="light" aria-checked="false" aria-label="Светлая тема" title="Светлая" data-i18n-attr="aria-label:theme.light.aria;title:theme.light"><i></i></button>
+                <button type="button" role="radio" data-set-theme="navy" aria-checked="false" aria-label="Тёмно-синяя тема" title="Тёмно-синяя" data-i18n-attr="aria-label:theme.navy.aria;title:theme.navy"><i></i></button>
+                <button type="button" role="radio" data-set-theme="black" aria-checked="false" aria-label="Чёрная тема" title="Чёрная" data-i18n-attr="aria-label:theme.black.aria;title:theme.black"><i></i></button>
+            </div>
+            <div class="accent-switch" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:acc.aria">
+                <button type="button" role="radio" data-set-accent="blue" aria-checked="false" aria-label="Синий" title="Синий" data-i18n-attr="aria-label:acc.blue;title:acc.blue"><i></i></button>
+                <button type="button" role="radio" data-set-accent="emerald" aria-checked="false" aria-label="Изумрудный" title="Изумрудный" data-i18n-attr="aria-label:acc.emerald;title:acc.emerald"><i></i></button>
+                <button type="button" role="radio" data-set-accent="violet" aria-checked="false" aria-label="Фиолетовый" title="Фиолетовый" data-i18n-attr="aria-label:acc.violet;title:acc.violet"><i></i></button>
+                <button type="button" role="radio" data-set-accent="coral" aria-checked="false" aria-label="Коралловый" title="Коралловый" data-i18n-attr="aria-label:acc.coral;title:acc.coral"><i></i></button>
+                <button type="button" role="radio" data-set-accent="cyan" aria-checked="false" aria-label="Голубой" title="Голубой" data-i18n-attr="aria-label:acc.cyan;title:acc.cyan"><i></i></button>
+            </div>
+            <button type="button" class="rk-install" data-install hidden title="Установить приложение" data-i18n-attr="title:app.install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="app.install">Установить приложение</span></button>
+        </div>
+    </header>
+
+    <!-- Работы: у каждой свои материалы и детали -->
+    <div class="rk-works">
+        <div class="container rk-works-in">
+            <div class="rk-mode" role="radiogroup" aria-label="Что считаем" data-i18n-attr="aria-label:tool.aria">
+                <button type="button" role="radio" data-tool-set="plates" aria-checked="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h11M14 4v16M14 16h7"/></svg><span data-i18n="tool.plates">Плиты</span></button>
+                <button type="button" role="radio" data-tool-set="fabric" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6c3-2 5 2 8 0s5 2 8 0v12c-3 2-5-2-8 0s-5-2-8 0z"/><path d="M4 12c3-2 5 2 8 0s5 2 8 0"/></svg><span data-i18n="tool.fabric">Ткань</span></button>
+            </div>
+            <div class="rk-tabs only-plates" id="rk-tabs" role="tablist" aria-label="Работы" data-i18n-attr="aria-label:w.tabs.aria"></div>
+            <button type="button" class="rk-btn rk-btn--ghost rk-btn--sm only-plates" id="rk-new"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="w.new">Новая работа</span></button>
+            <div class="rk-tabs only-fabric" id="fb-tabs" role="tablist" aria-label="Ткани" data-i18n-attr="aria-label:fb.tabs.aria"></div>
+            <button type="button" class="rk-btn rk-btn--ghost rk-btn--sm only-fabric" id="fb-new"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="fb.new">Новая ткань</span></button>
+        </div>
+    </div>
+
+    <main id="main" class="rk only-plates">
+        <div class="container">
+
+            <section class="rk-hero">
+                <h1 class="rk-title" data-i18n="h1">Онлайн-раскрой плитных материалов</h1>
+            </section>
+
+            <!-- 01. Материалы и настройки -->
+            <section class="rk-step" aria-labelledby="rk-h-mat">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">1</span>
+                    <div>
+                        <h2 id="rk-h-mat" class="rk-h2" data-i18n="step.mat">Материалы и настройки</h2>
+                    </div>
+                </header>
+
+                <div id="rk-materials" class="rk-materials"></div>
+
+                <div class="rk-add-mat">
+                    <label class="rk-sr" for="rk-preset" data-i18n="preset.aria">Готовый материал</label>
+                    <select id="rk-preset" class="rk-input">
+                        <option value="ldsp-2800" data-i18n="pre.ldsp-2800">ЛДСП 16 мм · 2800 × 2070</option>
+                        <option value="ldsp-2750" data-i18n="pre.ldsp-2750">ЛДСП 16 мм · 2750 × 1830</option>
+                        <option value="hdf-2800" data-i18n="pre.hdf-2800">ХДФ 3 мм · 2800 × 2070</option>
+                        <option value="hdf-2440" data-i18n="pre.hdf-2440">ХДФ 3 мм · 2440 × 1220</option>
+                        <option value="mdf-2800" data-i18n="pre.mdf-2800">МДФ 16 мм · 2800 × 1220</option>
+                        <option value="ply-1525" data-i18n="pre.ply-1525">Фанера 18 мм · 1525 × 1525</option>
+                        <option value="custom" data-i18n="pre.custom">Свой размер</option>
+                    </select>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-add-mat" data-i18n="add.mat">+ Добавить материал</button>
+                </div>
+
+                <div class="rk-settings">
+                    <label class="rk-f"><span data-i18n="s.kerf">Пропил, мм</span><input class="rk-input" id="s-kerf" inputmode="decimal" autocomplete="off"></label>
+                    <label class="rk-f"><span data-i18n="s.trim">Обрезка края листа, мм</span><input class="rk-input" id="s-trim" inputmode="decimal" autocomplete="off"></label>
+                    <label class="rk-f"><span class="rk-lab"><span data-i18n="s.mintrim">Минимальная обрезка, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.mintrim;aria-label:h.mintrim">?</i></span><input class="rk-input" id="s-mintrim" inputmode="decimal" autocomplete="off"></label>
+                    <label class="rk-f"><span data-i18n="s.cur">Валюта</span><input class="rk-input" id="s-cur" maxlength="8" autocomplete="off"></label>
+                </div>
+
+                <fieldset class="rk-grain" id="rk-grain">
+                    <legend data-i18n="s.grain.title">Если лист с текстурой — включить</legend>
+                    <div class="rk-grain-row">
+                        <label class="rk-check"><input type="checkbox" id="s-tex"><span class="rk-lab"><span data-i18n="s.tex">Учёт текстуры</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.tex;aria-label:h.tex">?</i></span></label>
+                        <label class="rk-check"><input type="checkbox" id="s-cplx"><span class="rk-lab"><span data-i18n="s.cplx">Использовать сложные полосы</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.cplx;aria-label:h.cplx">?</i></span></label>
+                    </div>
+                    <p class="rk-grain-note" id="rk-grain-note"></p>
+                </fieldset>
+
+                <details class="rk-adv" id="rk-adv" open>
+                    <summary data-i18n="s.adv">Параметры раскроя</summary>
+                    <div class="rk-adv-grid">
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.dir">Начальное направление резов</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.dir;aria-label:h.dir">?</i></span>
+                            <select class="rk-input" id="s-dir">
+                                <option value="auto" data-i18n="s.dir.auto">Автоматически (подбор лучшего)</option>
+                                <option value="length" data-i18n="s.dir.len">Вдоль длины листа</option>
+                                <option value="width" data-i18n="s.dir.wid">Вдоль ширины листа</option>
+                            </select></label>
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.minstrip">Минимальная ширина полосы, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.minstrip;aria-label:h.minstrip">?</i></span><input class="rk-input" id="s-minstrip" inputmode="decimal" autocomplete="off" placeholder="0"></label>
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.maxstrip">Максимальная ширина полосы, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.maxstrip;aria-label:h.maxstrip">?</i></span><input class="rk-input" id="s-maxstrip" inputmode="decimal" autocomplete="off" placeholder="0"></label>
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.maxlen">Максимальная длина полосы, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.maxlen;aria-label:h.maxlen">?</i></span><input class="rk-input" id="s-maxlen" inputmode="decimal" autocomplete="off" placeholder="0"></label>
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.off">Мин. размер остатка первой стороны, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.off;aria-label:h.off">?</i></span><input class="rk-input" id="s-off" inputmode="decimal" autocomplete="off"></label>
+                        <label class="rk-f"><span class="rk-lab"><span data-i18n="s.off2">Мин. размер остатка второй стороны, мм</span><i class="rk-help" tabindex="0" role="img" data-i18n-attr="data-tip:h.off2;aria-label:h.off2">?</i></span><input class="rk-input" id="s-off2" inputmode="decimal" autocomplete="off"></label>
+                    </div>
+                </details>
+            </section>
+
+            <!-- 02. Детали -->
+            <section class="rk-step" aria-labelledby="rk-h-parts">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">2</span>
+                    <div>
+                        <h2 id="rk-h-parts" class="rk-h2" data-i18n="step.parts">Детали</h2>
+                    </div>
+                </header>
+
+                <div class="rk-toolbar">
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-add-part" data-i18n="b.addpart">+ Добавить деталь</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-paste-toggle" aria-expanded="false" aria-controls="rk-paste" data-i18n="b.paste">Вставить список</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-import" data-i18n="b.import">Импорт из Базис</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-example" data-i18n="b.example">Пример: шкаф</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-parts" data-i18n="b.csvparts">Скачать CSV деталей</button>
+                    <button type="button" class="rk-btn rk-btn--danger" id="rk-clear" data-i18n="b.clear">Очистить</button>
+                </div>
+
+                <input type="file" id="rk-import-file" accept=".project,.csv,.tsv,.txt,.json,.xlsx" hidden>
+                <p class="rk-hint rk-import-note" id="rk-import-note" role="status" hidden></p>
+
+                <div class="rk-paste" id="rk-paste" hidden>
+                    <label class="rk-f rk-f--wide">
+                        <span data-i18n="paste.list">Список деталей</span>
+                        <textarea class="rk-input" id="rk-paste-text" rows="6" spellcheck="false"></textarea>
+                    </label>
+                    <div class="rk-paste-row">
+                        <label class="rk-f"><span data-i18n="paste.mat">Материал для импорта</span><select class="rk-input" id="rk-paste-mat"></select></label>
+                        <button type="button" class="rk-btn" id="rk-paste-go" data-i18n="paste.go">Добавить в список</button>
+                    </div>
+                    <p class="rk-hint" id="rk-paste-note" role="status"></p>
+                </div>
+
+                <div class="rk-parts" id="rk-parts-wrap">
+                    <div class="rk-row rk-row--head" aria-hidden="true">
+                        <span>№</span><span data-i18n="h.name">Название</span><span data-i18n="h.mat">Материал</span><span data-i18n="h.l">Длина</span><span data-i18n="h.w">Ширина</span><span data-i18n="h.q">Шт.</span><span data-i18n="h.edge">Кромка</span><span></span><span></span><span></span>
+                    </div>
+                    <div id="rk-parts"></div>
+                </div>
+            </section>
+
+            <!-- 03. Результат -->
+            <section class="rk-step" id="rk-result" aria-labelledby="rk-h-res">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">3</span>
+                    <div>
+                        <h2 id="rk-h-res" class="rk-h2" data-i18n="step.res">Результат раскроя</h2>
+                        <p class="rk-sr" id="rk-status" role="status" aria-live="polite"></p>
+                        <p class="rk-print-only" id="rk-print-name"></p>
+                    </div>
+                    <div class="rk-actions">
+                        <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-cut" data-i18n="b.csvcut">CSV раскроя</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="rk-print" data-i18n="b.print">Печать / PDF</button>
+                    </div>
+                </header>
+
+                <div id="rk-summary" class="rk-summary"></div>
+                <div id="rk-warn" class="rk-warn" hidden></div>
+                <div id="rk-out"></div>
+            </section>
+
+            <!-- 04. Мои работы -->
+            <section class="rk-step" id="rk-works" aria-labelledby="rk-h-works">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">4</span>
+                    <div>
+                        <h2 id="rk-h-works" class="rk-h2" data-i18n="step.works">Мои работы</h2>
+                    </div>
+                    <div class="rk-actions">
+                        <button type="button" class="rk-btn" id="rk-backup" title="Сохранить копию всех работ в файл" data-i18n-attr="title:b.backup.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span data-i18n="b.backup">Копия работ</span></button>
+                        <button type="button" class="rk-btn" id="rk-restore" title="Вернуть работы из файла копии" data-i18n-attr="title:b.restore.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9M7 13l5-5 5 5M5 4h14"/></svg><span data-i18n="b.restore">Из копии</span></button>
+                        <input type="file" id="rk-restore-file" accept=".json,application/json" hidden>
+                        <button type="button" class="rk-btn" id="rk-zip-all"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="b.zipall">Скачать всё одним файлом</span></button>
+                    </div>
+                </header>
+                <div class="rk-wlist" id="rk-works-list"></div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Раскрой ткани -->
+    <main id="fb-main" class="rk rk-fb only-fabric">
+        <div class="container">
+            <section class="rk-hero">
+                <h1 class="rk-title" data-i18n="fb.h1">Раскрой ткани для мягкой мебели</h1>
+                <p class="rk-hint rk-hero-sub" data-i18n="fb.sub">Сколько метров ткани уйдёт на диван, кресло или чехол: введите ширину рулона и размеры деталей, сайт уложит их на рулон и посчитает метраж.</p>
+            </section>
+
+            <section class="rk-step" aria-labelledby="fb-h-set">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">1</span>
+                    <div><h2 id="fb-h-set" class="rk-h2" data-i18n="fb.step.set">Ткань и настройки</h2></div>
+                </header>
+                <div id="fb-set"></div>
+            </section>
+
+            <section class="rk-step" aria-labelledby="fb-h-parts">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">2</span>
+                    <div><h2 id="fb-h-parts" class="rk-h2" data-i18n="fb.step.parts">Детали</h2></div>
+                </header>
+                <div class="rk-toolbar">
+                    <button type="button" class="rk-btn rk-btn--ghost" id="fb-add" data-i18n="fb.p.add">+ Добавить деталь</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="fb-paste-toggle" aria-expanded="false" aria-controls="fb-paste" data-i18n="fb.p.paste">Вставить список</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="fb-example" data-i18n="fb.p.example">Пример: диван</button>
+                    <button type="button" class="rk-btn rk-btn--danger" id="fb-clear" data-i18n="fb.p.clear">Очистить</button>
+                </div>
+                <div class="rk-paste" id="fb-paste" hidden>
+                    <label class="rk-f rk-f--wide">
+                        <span data-i18n="fb.paste.list">Список деталей</span>
+                        <textarea class="rk-input" id="fb-paste-text" rows="5" spellcheck="false"></textarea>
+                    </label>
+                    <p class="rk-hint" data-i18n="fb.paste.hint">Каждая строка: название, длина, ширина, штук.</p>
+                    <div class="rk-paste-row">
+                        <button type="button" class="rk-btn" id="fb-paste-go" data-i18n="fb.paste.go">Добавить в список</button>
+                    </div>
+                    <p class="rk-hint" id="fb-paste-note" role="status"></p>
+                </div>
+                <p class="rk-hint fb-hint" data-i18n="fb.p.hint">Длина идёт вдоль рулона (по нити), ширина поперёк рулона.</p>
+                <div class="rk-parts" id="fb-parts-wrap">
+                    <div class="fb-row fb-row--head" aria-hidden="true">
+                        <span>№</span><span data-i18n="fb.p.name">Название</span><div class="fb-dims"><span id="fb-hl">Длина</span><span id="fb-hw">Ширина</span><span data-i18n="fb.p.q">Шт.</span></div><span></span>
+                    </div>
+                    <div id="fb-parts"></div>
+                </div>
+            </section>
+
+            <section class="rk-step" id="fb-result" aria-labelledby="fb-h-res">
+                <header class="rk-step-head">
+                    <span class="rk-num" aria-hidden="true">3</span>
+                    <div><h2 id="fb-h-res" class="rk-h2" data-i18n="fb.step.res">Результат</h2></div>
+                    <div class="rk-actions">
+                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-svg" data-i18n="fb.dl.svg">Скачать чертёж (SVG)</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-copy" data-i18n="fb.copy">Копировать итог</button>
+                    </div>
+                </header>
+                <div id="fb-summary" class="rk-summary"></div>
+                <div id="fb-warn" class="rk-warn" hidden></div>
+                <div id="fb-draw"></div>
+                <div id="fb-total"></div>
+            </section>
+        </div>
+    </main>
+
+    <div class="rk-bar only-fabric" id="fb-bar">
+        <div class="rk-bar-in">
+            <p class="rk-bar-info" id="fb-bar-info"></p>
+            <div class="rk-bar-btns"><button type="button" class="rk-btn rk-btn--main" id="fb-go" data-i18n="fb.bar.go">К результату</button></div>
+        </div>
+    </div>
+
+    <!-- Нижняя панель -->
+    <div class="rk-bar only-plates" id="rk-bar">
+        <div class="rk-bar-in">
+            <p class="rk-bar-info" id="rk-bar-info"></p>
+            <div class="rk-bar-btns"><button type="button" class="rk-btn rk-btn--main" id="rk-run" data-i18n="b.run">Пересчитать</button></div>
+        </div>
+    </div>
+
+    <!-- Мобильный островок-меню (на телефоне и планшете) -->
+    <nav class="rk-island" id="rk-island" aria-label="Разделы" data-i18n-attr="aria-label:nav.aria">
+        <a class="isl-btn only-plates" title="Материалы" data-i18n-attr="title:nav.mat" href="#rk-h-mat" data-spy="rk-h-mat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg><span data-i18n="nav.mat">Материалы</span></a>
+        <a class="isl-btn only-plates" title="Детали" data-i18n-attr="title:nav.parts" href="#rk-h-parts" data-spy="rk-h-parts"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg><span data-i18n="nav.parts">Детали</span></a>
+        <a class="isl-btn only-plates" title="Результат" data-i18n-attr="title:nav.res" href="#rk-h-res" data-spy="rk-h-res"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h11M14 4v16M14 16h7"/></svg><span data-i18n="nav.res">Результат</span></a>
+        <a class="isl-btn only-fabric" title="Ткань" data-i18n-attr="title:nav.fb.set" href="#fb-h-set" data-spy="fb-h-set"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6c3-2 5 2 8 0s5 2 8 0v12c-3 2-5-2-8 0s-5-2-8 0z"/><path d="M4 12c3-2 5 2 8 0s5 2 8 0"/></svg><span data-i18n="nav.fb.set">Ткань</span></a>
+        <a class="isl-btn only-fabric" title="Детали" data-i18n-attr="title:nav.parts" href="#fb-h-parts" data-spy="fb-h-parts"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg><span data-i18n="nav.parts">Детали</span></a>
+        <a class="isl-btn only-fabric" title="Результат" data-i18n-attr="title:nav.res" href="#fb-h-res" data-spy="fb-h-res"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 12h11M14 4v16M14 16h7"/></svg><span data-i18n="nav.res">Результат</span></a>
+        <button type="button" class="isl-run" data-run aria-label="Пересчитать" title="Пересчитать" data-i18n-attr="aria-label:b.run;title:b.run"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+        <a class="isl-btn only-plates" title="Работы" data-i18n-attr="title:nav.works" href="#rk-h-works" data-spy="rk-h-works"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg><span data-i18n="nav.works">Работы</span></a>
+        <button type="button" class="isl-btn only-plates" id="isl-new" data-new aria-label="Новая работа" data-i18n-attr="aria-label:w.new"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg><span data-i18n="nav.new">Новая</span></button>
+        <button type="button" class="isl-btn only-fabric" id="isl-fnew" aria-label="Новая ткань" data-i18n-attr="aria-label:fb.new"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg><span data-i18n="nav.fb.new">Новая ткань</span></button>
+        <button type="button" class="isl-btn only-fabric" id="isl-plates" data-tool-go="plates" aria-label="Плиты" data-i18n-attr="aria-label:tool.plates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg><span data-i18n="nav.fb.plates">Плиты</span></button>
+        <button type="button" class="isl-btn" title="Настройки" data-i18n-attr="title:nav.set" id="isl-set" aria-expanded="false" aria-controls="isl-pop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h9M19 18h1"/><circle cx="16" cy="6" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/></svg><span data-i18n="nav.set">Настройки</span></button>
+    </nav>
+    <div class="isl-pop" id="isl-pop" hidden>
+        <button type="button" class="rk-install rk-install--pop" data-install hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="app.install">Установить приложение</span></button>
+        <div class="lang-switch" role="radiogroup" aria-label="Язык" data-i18n-attr="aria-label:lang.aria">
+            <button type="button" role="radio" data-lang-set="ru" aria-checked="false" title="Русский" lang="ru">RU</button>
+            <button type="button" role="radio" data-lang-set="en" aria-checked="false" title="English" lang="en">EN</button>
+            <button type="button" role="radio" data-lang-set="uz" aria-checked="false" title="O‘zbekcha" lang="uz">UZ</button>
+        </div>
+        <div class="theme-switch" role="radiogroup" aria-label="Тема оформления" data-i18n-attr="aria-label:theme.aria">
+            <button type="button" role="radio" data-set-theme="light" aria-checked="false" aria-label="Светлая тема" title="Светлая" data-i18n-attr="aria-label:theme.light.aria;title:theme.light"><i></i></button>
+            <button type="button" role="radio" data-set-theme="navy" aria-checked="false" aria-label="Тёмно-синяя тема" title="Тёмно-синяя" data-i18n-attr="aria-label:theme.navy.aria;title:theme.navy"><i></i></button>
+            <button type="button" role="radio" data-set-theme="black" aria-checked="false" aria-label="Чёрная тема" title="Чёрная" data-i18n-attr="aria-label:theme.black.aria;title:theme.black"><i></i></button>
+        </div>
+        <div class="accent-switch" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:acc.aria">
+                <button type="button" role="radio" data-set-accent="blue" aria-checked="false" aria-label="Синий" title="Синий" data-i18n-attr="aria-label:acc.blue;title:acc.blue"><i></i></button>
+                <button type="button" role="radio" data-set-accent="emerald" aria-checked="false" aria-label="Изумрудный" title="Изумрудный" data-i18n-attr="aria-label:acc.emerald;title:acc.emerald"><i></i></button>
+                <button type="button" role="radio" data-set-accent="violet" aria-checked="false" aria-label="Фиолетовый" title="Фиолетовый" data-i18n-attr="aria-label:acc.violet;title:acc.violet"><i></i></button>
+                <button type="button" role="radio" data-set-accent="coral" aria-checked="false" aria-label="Коралловый" title="Коралловый" data-i18n-attr="aria-label:acc.coral;title:acc.coral"><i></i></button>
+                <button type="button" role="radio" data-set-accent="cyan" aria-checked="false" aria-label="Голубой" title="Голубой" data-i18n-attr="aria-label:acc.cyan;title:acc.cyan"><i></i></button>
+            </div>
+    </div>
+
+    <div class="rk-drop" id="rk-drop" hidden><p data-i18n="app.drop">Отпустите файл: он откроется как новая работа</p></div>
+    <div class="rk-toast" id="rk-toast" role="status" aria-live="polite"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© <span id="year">2026</span> <span data-i18n="brand">Раскрой онлайн</span> · <a href="https://t.me/madaminovv712" target="_blank" rel="noopener noreferrer" data-i18n="footer.contact">Связаться с автором</a></p>
+        </div>
+    </footer>
+
+    <script src="./js/ui.js?v=20" defer></script>
+    <script src="./js/fabric-i18n.js?v=20" defer></script>
+    <script src="./js/i18n.js?v=20" defer></script>
+    <script src="./js/raskroy-core.js?v=20" defer></script>
+    <script src="./js/raskroy.js?v=20" defer></script>
+    <script src="./js/fabric-core.js?v=20" defer></script>
+    <script src="./js/fabric.js?v=20" defer></script>
+    <script src="./js/app.js?v=20" defer></script>
+</body>
+
+</html>
