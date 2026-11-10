@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=20">
-    <link rel="stylesheet" href="./css/style.css?v=20">
+    <link rel="stylesheet" href="./css/reset.css?v=21">
+    <link rel="stylesheet" href="./css/style.css?v=21">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=20"></script>
+    <script src="./js/theme-init.js?v=21"></script>
 </head>
 
 <body class="rk-page">
@@ -47,18 +47,7 @@
                 <button type="button" role="radio" data-lang-set="en" aria-checked="false" title="English" lang="en">EN</button>
                 <button type="button" role="radio" data-lang-set="uz" aria-checked="false" title="O‘zbekcha" lang="uz">UZ</button>
             </div>
-            <div class="theme-switch" role="radiogroup" aria-label="Тема оформления" data-i18n-attr="aria-label:theme.aria">
-                <button type="button" role="radio" data-set-theme="light" aria-checked="false" aria-label="Светлая тема" title="Светлая" data-i18n-attr="aria-label:theme.light.aria;title:theme.light"><i></i></button>
-                <button type="button" role="radio" data-set-theme="navy" aria-checked="false" aria-label="Тёмно-синяя тема" title="Тёмно-синяя" data-i18n-attr="aria-label:theme.navy.aria;title:theme.navy"><i></i></button>
-                <button type="button" role="radio" data-set-theme="black" aria-checked="false" aria-label="Чёрная тема" title="Чёрная" data-i18n-attr="aria-label:theme.black.aria;title:theme.black"><i></i></button>
-            </div>
-            <div class="accent-switch" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:acc.aria">
-                <button type="button" role="radio" data-set-accent="blue" aria-checked="false" aria-label="Синий" title="Синий" data-i18n-attr="aria-label:acc.blue;title:acc.blue"><i></i></button>
-                <button type="button" role="radio" data-set-accent="emerald" aria-checked="false" aria-label="Изумрудный" title="Изумрудный" data-i18n-attr="aria-label:acc.emerald;title:acc.emerald"><i></i></button>
-                <button type="button" role="radio" data-set-accent="violet" aria-checked="false" aria-label="Фиолетовый" title="Фиолетовый" data-i18n-attr="aria-label:acc.violet;title:acc.violet"><i></i></button>
-                <button type="button" role="radio" data-set-accent="coral" aria-checked="false" aria-label="Коралловый" title="Коралловый" data-i18n-attr="aria-label:acc.coral;title:acc.coral"><i></i></button>
-                <button type="button" role="radio" data-set-accent="cyan" aria-checked="false" aria-label="Голубой" title="Голубой" data-i18n-attr="aria-label:acc.cyan;title:acc.cyan"><i></i></button>
-            </div>
+            <button type="button" class="lk-open" data-look-open aria-haspopup="dialog" aria-controls="lk" aria-label="Оформление" title="Оформление" data-i18n-attr="aria-label:lk.title;title:lk.title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10" cy="7" r="1.1"/><circle cx="14.5" cy="7" r="1.1"/></svg></button>
             <button type="button" class="rk-install" data-install hidden title="Установить приложение" data-i18n-attr="title:app.install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="app.install">Установить приложение</span></button>
         </div>
     </header>
@@ -325,19 +314,41 @@
             <button type="button" role="radio" data-lang-set="en" aria-checked="false" title="English" lang="en">EN</button>
             <button type="button" role="radio" data-lang-set="uz" aria-checked="false" title="O‘zbekcha" lang="uz">UZ</button>
         </div>
-        <div class="theme-switch" role="radiogroup" aria-label="Тема оформления" data-i18n-attr="aria-label:theme.aria">
-            <button type="button" role="radio" data-set-theme="light" aria-checked="false" aria-label="Светлая тема" title="Светлая" data-i18n-attr="aria-label:theme.light.aria;title:theme.light"><i></i></button>
-            <button type="button" role="radio" data-set-theme="navy" aria-checked="false" aria-label="Тёмно-синяя тема" title="Тёмно-синяя" data-i18n-attr="aria-label:theme.navy.aria;title:theme.navy"><i></i></button>
-            <button type="button" role="radio" data-set-theme="black" aria-checked="false" aria-label="Чёрная тема" title="Чёрная" data-i18n-attr="aria-label:theme.black.aria;title:theme.black"><i></i></button>
-        </div>
-        <div class="accent-switch" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:acc.aria">
-                <button type="button" role="radio" data-set-accent="blue" aria-checked="false" aria-label="Синий" title="Синий" data-i18n-attr="aria-label:acc.blue;title:acc.blue"><i></i></button>
-                <button type="button" role="radio" data-set-accent="emerald" aria-checked="false" aria-label="Изумрудный" title="Изумрудный" data-i18n-attr="aria-label:acc.emerald;title:acc.emerald"><i></i></button>
-                <button type="button" role="radio" data-set-accent="violet" aria-checked="false" aria-label="Фиолетовый" title="Фиолетовый" data-i18n-attr="aria-label:acc.violet;title:acc.violet"><i></i></button>
-                <button type="button" role="radio" data-set-accent="coral" aria-checked="false" aria-label="Коралловый" title="Коралловый" data-i18n-attr="aria-label:acc.coral;title:acc.coral"><i></i></button>
-                <button type="button" role="radio" data-set-accent="cyan" aria-checked="false" aria-label="Голубой" title="Голубой" data-i18n-attr="aria-label:acc.cyan;title:acc.cyan"><i></i></button>
-            </div>
+        <button type="button" class="rk-btn lk-open lk-open--pop" data-look-open aria-haspopup="dialog" aria-controls="lk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10" cy="7" r="1.1"/><circle cx="14.5" cy="7" r="1.1"/></svg><span data-i18n="lk.title">Оформление</span></button>
     </div>
+
+    <!-- Оформление: тема, фон, цвет акцента -->
+    <div class="lk-ov" id="lk-ov" hidden></div>
+    <section class="lk" id="lk" role="dialog" aria-modal="true" aria-labelledby="lk-title" hidden>
+        <div class="lk-head">
+            <h2 id="lk-title" data-i18n="lk.title">Оформление</h2>
+            <button type="button" class="lk-x" id="lk-close" aria-label="Закрыть" data-i18n-attr="aria-label:lk.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div class="lk-body">
+            <div class="lk-sec">
+                <h3 data-i18n="lk.theme">Тема</h3>
+            <div class="theme-switch" role="radiogroup" aria-label="Тема оформления" data-i18n-attr="aria-label:theme.aria">
+                <button type="button" role="radio" data-set-theme="light" aria-checked="false" aria-label="Светлая тема" title="Светлая" data-i18n-attr="aria-label:theme.light.aria;title:theme.light"><i></i></button>
+                <button type="button" role="radio" data-set-theme="navy" aria-checked="false" aria-label="Тёмно-синяя тема" title="Тёмно-синяя" data-i18n-attr="aria-label:theme.navy.aria;title:theme.navy"><i></i></button>
+                <button type="button" role="radio" data-set-theme="black" aria-checked="false" aria-label="Чёрная тема" title="Чёрная" data-i18n-attr="aria-label:theme.black.aria;title:theme.black"><i></i></button>
+            </div>
+            </div>
+            <div class="lk-sec">
+                <h3 data-i18n="lk.bg">Фон</h3>
+                <p class="lk-sub" data-i18n="lk.light">Светлые</p>
+                <div class="lk-grid" id="lk-bg-l" role="radiogroup" aria-label="Светлые фоны" data-i18n-attr="aria-label:lk.light"></div>
+                <p class="lk-sub" data-i18n="lk.dark">Тёмные</p>
+                <div class="lk-grid" id="lk-bg-d" role="radiogroup" aria-label="Тёмные фоны" data-i18n-attr="aria-label:lk.dark"></div>
+                <label class="lk-pick"><input type="color" id="lk-bg-pick" value="#e6ebf3"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-bg-hex"></output></label>
+            </div>
+            <div class="lk-sec">
+                <h3 data-i18n="lk.acc">Цвет акцента</h3>
+                <div class="lk-grid lk-grid--acc" id="lk-acc" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:lk.acc"></div>
+                <label class="lk-pick"><input type="color" id="lk-acc-pick" value="#3b82f6"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-acc-hex"></output></label>
+            </div>
+            <button type="button" class="rk-btn rk-btn--ghost lk-reset" id="lk-reset" data-i18n="lk.reset">Сбросить оформление</button>
+        </div>
+    </section>
 
     <div class="rk-drop" id="rk-drop" hidden><p data-i18n="app.drop">Отпустите файл: он откроется как новая работа</p></div>
     <div class="rk-toast" id="rk-toast" role="status" aria-live="polite"></div>
@@ -348,14 +359,16 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=20" defer></script>
-    <script src="./js/fabric-i18n.js?v=20" defer></script>
-    <script src="./js/i18n.js?v=20" defer></script>
-    <script src="./js/raskroy-core.js?v=20" defer></script>
-    <script src="./js/raskroy.js?v=20" defer></script>
-    <script src="./js/fabric-core.js?v=20" defer></script>
-    <script src="./js/fabric.js?v=20" defer></script>
-    <script src="./js/app.js?v=20" defer></script>
+    <script src="./js/ui.js?v=21" defer></script>
+    <script src="./js/fabric-i18n.js?v=21" defer></script>
+    <script src="./js/look-i18n.js?v=21" defer></script>
+    <script src="./js/i18n.js?v=21" defer></script>
+    <script src="./js/raskroy-core.js?v=21" defer></script>
+    <script src="./js/raskroy.js?v=21" defer></script>
+    <script src="./js/fabric-core.js?v=21" defer></script>
+    <script src="./js/fabric.js?v=21" defer></script>
+    <script src="./js/look.js?v=21" defer></script>
+    <script src="./js/app.js?v=21" defer></script>
 </body>
 
 </html>

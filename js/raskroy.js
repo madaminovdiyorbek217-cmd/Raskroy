@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '20';
+    var VERSION = '21';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -1476,6 +1476,8 @@
         if (!box) return;
         box.innerHTML = '';
         var many = projects.list.length > 1;
+        var wb = document.querySelector('.rk-island a[data-spy="rk-h-works"]');
+        if (wb) { if (many) wb.setAttribute('data-badge', String(projects.list.length)); else wb.removeAttribute('data-badge'); }
         projects.list.forEach(function (it) {
             var on = it.id === projects.active;
             var tab = el('div', 'rk-tab' + (on ? ' is-active' : ''));
