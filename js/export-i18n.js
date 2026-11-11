@@ -71,3 +71,13 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'd.cancel': 'Отмена', 'd.ok': 'ОК', 'd.delete': 'Удалить', 'd.replace': 'Заменить' },
+        en: { 'd.cancel': 'Cancel', 'd.ok': 'OK', 'd.delete': 'Delete', 'd.replace': 'Replace' },
+        uz: { 'd.cancel': 'Bekor qilish', 'd.ok': 'OK', 'd.delete': 'O‘chirish', 'd.replace': 'Almashtirish' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

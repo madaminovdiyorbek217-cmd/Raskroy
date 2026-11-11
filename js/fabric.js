@@ -170,12 +170,13 @@
         if (state.list.length < 2) return;
         var f = state.list.filter(function (x) { return x.id === id; })[0];
         if (!f) return;
-        if (f.parts.length && !window.confirm(t('fb.delconfirm', { name: label(f), n: f.parts.length }))) return;
-        var idx = state.list.indexOf(f);
-        state.list.splice(idx, 1);
-        delete cache[id];
-        if (state.active === id) state.active = state.list[Math.min(idx, state.list.length - 1)].id;
-        saveNow(); renderAll();
+        RKDialog.ask(f.parts.length, t('fb.delconfirm', { name: label(f), n: f.parts.length }), { ok: t('d.delete'), danger: true }, function () {
+            var idx = state.list.indexOf(f);
+            state.list.splice(idx, 1);
+            delete cache[id];
+            if (state.active === id) state.active = state.list[Math.min(idx, state.list.length - 1)].id;
+            saveNow(); renderAll();
+        });
     }
     $('#fb-new').addEventListener('click', newFabric);
     $('#isl-fnew').addEventListener('click', newFabric);
@@ -299,16 +300,18 @@
     $('#fb-add').addEventListener('click', function () { addPart(true); });
     $('#fb-example').addEventListener('click', function () {
         var f = active();
-        if (f.parts.length && !window.confirm(t('fb.c.example'))) return;
-        f.parts = exampleParts();
-        if (!f.roll) f.roll = 1400;
-        renderSettings(); renderParts(); changed(true);
+        RKDialog.ask(f.parts.length, t('fb.c.example'), { ok: t('d.replace') }, function () {
+            f.parts = exampleParts();
+            if (!f.roll) f.roll = 1400;
+            renderSettings(); renderParts(); changed(true);
+        });
     });
     $('#fb-clear').addEventListener('click', function () {
         var f = active();
-        if (f.parts.length && !window.confirm(t('fb.c.clear'))) return;
-        f.parts = [];
-        renderParts(); changed(true);
+        RKDialog.ask(f.parts.length, t('fb.c.clear'), { ok: t('d.delete'), danger: true }, function () {
+            f.parts = [];
+            renderParts(); changed(true);
+        });
     });
 
     var pasteBox = $('#fb-paste');

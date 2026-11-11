@@ -876,3 +876,11 @@ html.rkx-lock, html.rkx-lock body { overflow: hidden; }
 @media (hover: none) and (pointer: coarse), (max-width: 700px) {
     .rks-pop.is-drop .rks-opt { min-height: 46px; font-size: 16px; }
 }
+
+/* ---------- Окно подтверждения (js/dialog.js) ---------- */
+.rkd-card { gap: 16px; padding: 24px 20px 18px; }
+.rkd-msg { font-size: 17px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.rkd-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rkd-btns .rk-btn { min-height: 48px; padding: 0 12px; justify-content: center; }
+.rk-btn.rkd-danger { height: 46px; border-color: color-mix(in srgb, #ff7a3d 70%, transparent); background: color-mix(in srgb, #ff7a3d 18%, transparent); color: #ff7a3d; font-weight: 700; }
+:root[data-theme="light"] .rk-btn.rkd-danger { color: #c2410c; border-color: #c2410c; background: #fff1ea; }

@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '25';
+    var VERSION = '26';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -228,10 +228,11 @@
             del.addEventListener('click', function () {
                 if (state.materials.length < 2) return;
                 var used = state.parts.filter(function (p) { return p.mat === m.id; }).length;
-                if (used && !window.confirm(t('m.delconfirm', { name: m.name, n: used }))) return;
-                state.parts = state.parts.filter(function (p) { return p.mat !== m.id; });
-                state.materials.splice(i, 1);
-                renderMaterials(); renderParts(); changed();
+                RKDialog.ask(used, t('m.delconfirm', { name: m.name, n: used }), { ok: t('d.delete'), danger: true }, function () {
+                    state.parts = state.parts.filter(function (p) { return p.mat !== m.id; });
+                    state.materials.splice(i, 1);
+                    renderMaterials(); renderParts(); changed();
+                });
             });
             matsBox.appendChild(card);
         });
@@ -501,15 +502,17 @@
     $('#rk-add-part').addEventListener('click', function () { addPart(true); });
 
     $('#rk-example').addEventListener('click', function () {
-        if (state.parts.length && !window.confirm(t('c.example'))) return;
-        state = exampleState();
-        renderAll(); changed(true);
+        RKDialog.ask(state.parts.length, t('c.example'), { ok: t('d.replace') }, function () {
+            state = exampleState();
+            renderAll(); changed(true);
+        });
     });
 
     $('#rk-clear').addEventListener('click', function () {
-        if (state.parts.length && !window.confirm(t('c.clear'))) return;
-        state.parts = [];
-        renderParts(); changed(true);
+        RKDialog.ask(state.parts.length, t('c.clear'), { ok: t('d.delete'), danger: true }, function () {
+            state.parts = [];
+            renderParts(); changed(true);
+        });
     });
 
     /* Разбор строки «название 2200 550 2» (числа: длина, ширина, штук) */
@@ -1699,19 +1702,20 @@
         var idx = -1;
         projects.list.forEach(function (it, i) { if (it.id === id) idx = i; });
         if (idx < 0) return;
-        if (!window.confirm(t('w.delconfirm', { name: workLabel(projects.list[idx]) }))) return;
-        var wasActive = id === projects.active;
-        projects.list.splice(idx, 1);
-        if (wasActive) {
-            projects.active = projects.list[Math.min(idx, projects.list.length - 1)].id;
-            state = activeItem().state;
-            relocalize(state);
-            clearTimeout(timer);
-            renderAll(); updateBar();
-            run(350);
-        }
-        saveNow();
-        renderTabs(); renderWorks();
+        RKDialog.ask(true, t('w.delconfirm', { name: workLabel(projects.list[idx]) }), { ok: t('d.delete'), danger: true }, function () {
+            var wasActive = id === projects.active;
+            projects.list.splice(idx, 1);
+            if (wasActive) {
+                projects.active = projects.list[Math.min(idx, projects.list.length - 1)].id;
+                state = activeItem().state;
+                relocalize(state);
+                clearTimeout(timer);
+                renderAll(); updateBar();
+                run(350);
+            }
+            saveNow();
+            renderTabs(); renderWorks();
+        });
     }
 
     $$('[data-new], #rk-new').forEach(function (b) { b.addEventListener('click', newWork); });
