@@ -154,17 +154,32 @@
     spy();
     document.addEventListener('rk:tool', function () { setTimeout(spy, 30); });
 
-    /* при вводе с экранной клавиатуры островок прячется, чтобы не закрывать поле */
-    var hideTimer = 0;
-    function isField(el) { return el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName); }
-    document.addEventListener('focusin', function (e) {
-        if (!isField(e.target) || island.contains(e.target)) return;
-        clearTimeout(hideTimer);
-        island.classList.add('is-hidden');
-        closePop();
-    });
-    document.addEventListener('focusout', function () {
-        clearTimeout(hideTimer);
-        hideTimer = setTimeout(function () { if (!isField(document.activeElement)) island.classList.remove('is-hidden'); }, 180);
-    });
+    /* Когда открыта экранная клавиатура, островок не пропадает, а уходит на задний план (бледнеет и сжимается).
+       Клавиатуру определяем по размеру видимой области: на Android кнопка «скрыть клавиатуру» не снимает фокус с поля,
+       поэтому по фокусу островок обратно не вернуть. */
+    var vv = window.visualViewport, baseH = window.innerHeight, bgOn = false, bgTimer = 0;
+    function isField(el) { return !!el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) && !/^(button|checkbox|radio|range|submit|file)$/.test(el.type || ''); }
+    function viewH() { return vv ? vv.height : window.innerHeight; }
+    function kbOpen() { return isField(document.activeElement) && baseH - viewH() > 110; }
+    function setBg(on) {
+        if (on === bgOn) return;
+        bgOn = on;
+        island.classList.toggle('is-bg', on);
+        if (on) closePop();
+    }
+    function check() {
+        /* пока поле не в фокусе, запоминаем полную высоту экрана (при повороте она меняется) */
+        if (!isField(document.activeElement)) baseH = window.innerHeight;
+        setBg(kbOpen());
+    }
+    function checkSoon() { clearTimeout(bgTimer); bgTimer = setTimeout(check, 60); }
+    document.addEventListener('focusin', function (e) { if (!island.contains(e.target)) checkSoon(); });
+    document.addEventListener('focusout', function () { checkSoon(); setTimeout(check, 350); });
+    if (vv) { vv.addEventListener('resize', checkSoon); }
+    window.addEventListener('resize', checkSoon);
+    window.addEventListener('orientationchange', function () { baseH = 0; setTimeout(function () { baseH = window.innerHeight; check(); }, 400); });
+    /* страховка: любое касание вне поля, прокрутка или возврат в приложение возвращают островок */
+    document.addEventListener('touchstart', function (e) { if (bgOn && !isField(e.target)) setTimeout(check, 400); }, { passive: true });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) { baseH = window.innerHeight; setBg(false); } });
+    window.addEventListener('pageshow', function () { baseH = window.innerHeight; setBg(false); });
 })();

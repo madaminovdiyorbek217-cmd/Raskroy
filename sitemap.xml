@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Замените YOUR-DOMAIN.com на адрес вашего сайта -->
+<!-- Адрес сайта указан ниже; при смене адреса поправьте его -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://YOUR-DOMAIN.com/</loc>
+        <loc>https://madaminovdiyorbek217-cmd.github.io/Raskroy/</loc>
     </url>
 </urlset>

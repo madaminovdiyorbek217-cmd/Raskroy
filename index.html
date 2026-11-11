@@ -9,18 +9,18 @@
     <meta name="description" content="Бесплатный онлайн-раскрой ЛДСП, МДФ и фанеры: карты раскроя, расчёт листов, кромки и длины реза. Работает в браузере, данные остаются у вас." data-i18n-attr="content:meta.desc">
     <meta name="theme-color" content="#081327">
 
-    <!-- ВАЖНО: замените YOUR-DOMAIN.com на адрес вашего сайта -->
-    <link rel="canonical" href="https://YOUR-DOMAIN.com/">
+    <!-- Адрес сайта: https://madaminovdiyorbek217-cmd.github.io/Raskroy/ (если смените адрес, поправьте его здесь, в robots.txt и sitemap.xml) -->
+    <link rel="canonical" href="https://madaminovdiyorbek217-cmd.github.io/Raskroy/">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ru_RU">
-    <meta property="og:url" content="https://YOUR-DOMAIN.com/">
+    <meta property="og:url" content="https://madaminovdiyorbek217-cmd.github.io/Raskroy/">
     <meta property="og:title" content="Онлайн-раскрой плитных материалов" data-i18n-attr="content:meta.title">
     <meta property="og:description" content="Карты раскроя ЛДСП, МДФ и фанеры прямо в браузере: листы, кромка, длина реза." data-i18n-attr="content:meta.ogdesc">
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=21">
-    <link rel="stylesheet" href="./css/style.css?v=21">
+    <link rel="stylesheet" href="./css/reset.css?v=24">
+    <link rel="stylesheet" href="./css/style.css?v=24">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=21"></script>
+    <script src="./js/theme-init.js?v=24"></script>
 </head>
 
 <body class="rk-page">
@@ -146,7 +146,7 @@
                     <button type="button" class="rk-btn rk-btn--ghost" id="rk-paste-toggle" aria-expanded="false" aria-controls="rk-paste" data-i18n="b.paste">Вставить список</button>
                     <button type="button" class="rk-btn rk-btn--ghost" id="rk-import" data-i18n="b.import">Импорт из Базис</button>
                     <button type="button" class="rk-btn rk-btn--ghost" id="rk-example" data-i18n="b.example">Пример: шкаф</button>
-                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-parts" data-i18n="b.csvparts">Скачать CSV деталей</button>
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-parts" data-i18n="b.csvparts">Скачать Excel</button>
                     <button type="button" class="rk-btn rk-btn--danger" id="rk-clear" data-i18n="b.clear">Очистить</button>
                 </div>
 
@@ -183,7 +183,7 @@
                         <p class="rk-print-only" id="rk-print-name"></p>
                     </div>
                     <div class="rk-actions">
-                        <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-cut" data-i18n="b.csvcut">CSV раскроя</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="rk-csv-cut" data-i18n="b.csvcut">Excel раскроя</button>
                         <button type="button" class="rk-btn rk-btn--ghost" id="rk-print" data-i18n="b.print">Печать / PDF</button>
                     </div>
                 </header>
@@ -200,11 +200,17 @@
                     <div>
                         <h2 id="rk-h-works" class="rk-h2" data-i18n="step.works">Мои работы</h2>
                     </div>
-                    <div class="rk-actions">
-                        <button type="button" class="rk-btn" id="rk-backup" title="Сохранить копию всех работ в файл" data-i18n-attr="title:b.backup.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span data-i18n="b.backup">Копия работ</span></button>
-                        <button type="button" class="rk-btn" id="rk-restore" title="Вернуть работы из файла копии" data-i18n-attr="title:b.restore.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9M7 13l5-5 5 5M5 4h14"/></svg><span data-i18n="b.restore">Из копии</span></button>
-                        <input type="file" id="rk-restore-file" accept=".json,application/json" hidden>
-                        <button type="button" class="rk-btn" id="rk-zip-all"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="b.zipall">Скачать всё одним файлом</span></button>
+                    <div class="rk-wtools">
+                        <div class="rk-wrow">
+                            <button type="button" class="rk-btn rk-btn--ghost rk-wbtn" id="rk-backup" title="Сохранить копию всех работ в файл" data-i18n-attr="title:b.backup.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span data-i18n="b.backup">Копия работ</span></button>
+                            <button type="button" class="rk-btn rk-btn--ghost rk-wbtn" id="rk-restore" title="Вернуть работы из файла копии" data-i18n-attr="title:b.restore.t"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V9M7 13l5-5 5 5M5 4h14"/></svg><span data-i18n="b.restore">Из копии</span></button>
+                            <input type="file" id="rk-restore-file" accept=".json,application/json" hidden>
+                        </div>
+                        <div class="rk-wrow">
+                            <button type="button" class="rk-btn rk-wbtn rk-wbtn--main" id="rk-zip-all"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 14h6M9 17h4"/></svg><span data-i18n="b.zipall">Скачать всё одним файлом (PDF)</span></button>
+                            <button type="button" class="rk-btn rk-btn--ghost rk-wbtn" id="rk-xlsx-all"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16M4 14.5h16M10 5v14"/></svg><span data-i18n="b.xlsxall">Excel</span></button>
+                            <button type="button" class="rk-btn rk-btn--ghost rk-wbtn only-desk" id="rk-zip-desk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M12 4v3M12 9v2M12 13v2"/><rect x="10" y="15" width="4" height="3" rx="1"/></svg><span data-i18n="b.zipdesk">ZIP</span></button>
+                        </div>
                     </div>
                 </header>
                 <div class="rk-wlist" id="rk-works-list"></div>
@@ -265,7 +271,10 @@
                     <span class="rk-num" aria-hidden="true">3</span>
                     <div><h2 id="fb-h-res" class="rk-h2" data-i18n="fb.step.res">Результат</h2></div>
                     <div class="rk-actions">
-                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-svg" data-i18n="fb.dl.svg">Скачать чертёж (SVG)</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-png" data-i18n="fb.dl.png">Скачать PNG</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-pdf" data-i18n="fb.dl.pdf">Скачать PDF</button>
+                        <button type="button" class="rk-btn rk-btn--ghost" id="fb-xlsx" data-i18n="fb.dl.xlsx">Скачать Excel</button>
+                        <button type="button" class="rk-btn rk-btn--ghost only-desk" id="fb-svg" data-i18n="fb.dl.svg">SVG</button>
                         <button type="button" class="rk-btn rk-btn--ghost" id="fb-copy" data-i18n="fb.copy">Копировать итог</button>
                     </div>
                 </header>
@@ -359,16 +368,19 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=21" defer></script>
-    <script src="./js/fabric-i18n.js?v=21" defer></script>
-    <script src="./js/look-i18n.js?v=21" defer></script>
-    <script src="./js/i18n.js?v=21" defer></script>
-    <script src="./js/raskroy-core.js?v=21" defer></script>
-    <script src="./js/raskroy.js?v=21" defer></script>
-    <script src="./js/fabric-core.js?v=21" defer></script>
-    <script src="./js/fabric.js?v=21" defer></script>
-    <script src="./js/look.js?v=21" defer></script>
-    <script src="./js/app.js?v=21" defer></script>
+    <script src="./js/ui.js?v=24" defer></script>
+    <script src="./js/fabric-i18n.js?v=24" defer></script>
+    <script src="./js/look-i18n.js?v=24" defer></script>
+    <script src="./js/export-i18n.js?v=24" defer></script>
+    <script src="./js/i18n.js?v=24" defer></script>
+    <script src="./js/export.js?v=24" defer></script>
+    <script src="./js/select.js?v=24" defer></script>
+    <script src="./js/raskroy-core.js?v=24" defer></script>
+    <script src="./js/raskroy.js?v=24" defer></script>
+    <script src="./js/fabric-core.js?v=24" defer></script>
+    <script src="./js/fabric.js?v=24" defer></script>
+    <script src="./js/look.js?v=24" defer></script>
+    <script src="./js/app.js?v=24" defer></script>
 </body>
 
 </html>

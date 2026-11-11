@@ -444,7 +444,7 @@ select.rk-input option { background: var(--panel); color: var(--text); }
         box-shadow: 0 14px 34px rgba(15, 25, 60, .16), 0 2px 6px rgba(15, 25, 60, .08);
         transition: opacity .18s ease, transform .22s ease;
     }
-    .rk-island.is-hidden { opacity: 0; pointer-events: none; transform: translateY(24px); }
+    .rk-island.is-bg { opacity: .32; transform: scale(.86) translateY(6px); pointer-events: none; filter: saturate(.7); }
     .isl-btn {
         position: relative; width: var(--isl-b); height: var(--isl-b); padding: 0; box-sizing: border-box;
         display: grid; place-items: center;
@@ -789,3 +789,71 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: 
 }
 @media (prefers-reduced-motion: reduce) { .lk, .lk-ov, .lk-sw { transition: none; } }
 @media print { .lk, .lk-ov, .lk-open { display: none !important; } }
+
+/* ---------- Кнопки с иконками, «Мои работы», экспорт ---------- */
+.rk-btn svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.rk-wtools { margin-left: auto; display: grid; gap: 10px; min-width: 0; justify-items: end; }
+.rk-wrow { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; min-width: 0; }
+.rk-wbtn { flex: 0 1 auto; min-height: 44px; height: auto; padding: 10px 16px; gap: 9px; white-space: normal; text-align: center; line-height: 1.25; }
+.rk-wbtn span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 1100px) {
+    .rk-wtools { margin-left: 0; width: 100%; justify-items: stretch; }
+    .rk-wrow { justify-content: stretch; }
+    .rk-wrow .rk-wbtn { flex: 1 1 0; min-width: 130px; }
+    .rk-wbtn--main { flex-basis: 100% !important; }
+}
+@media (hover: none) and (pointer: coarse), (max-width: 700px) { .only-desk { display: none !important; } }
+.rk-work-acts { flex-wrap: wrap; justify-content: flex-end; }
+.rk-work-acts .rk-btn { min-width: 0; white-space: nowrap; }
+@media (max-width: 1100px) {
+    .rk-work-acts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; }
+    .rk-work-acts .rk-btn { width: 100%; height: 42px; padding: 0 10px; font-size: 15px; }
+}
+.rk-tb-act { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.rk-tb-act .rk-btn { white-space: nowrap; }
+.rk-btn[disabled], .rk-btn.is-busy { opacity: .6; pointer-events: none; }
+.rk-btn.is-busy::after { content: ""; width: 14px; height: 14px; margin-left: 6px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: rk-spin .7s linear infinite; }
+@keyframes rk-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Свой выпадающий список (js/select.js) ---------- */
+select.rks-native { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; overflow: hidden; clip-path: inset(50%); }
+.rks-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; cursor: pointer; font-family: var(--font); font-size: 16px; padding-right: 12px; -webkit-tap-highlight-color: transparent; }
+.rks-btn > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rks-btn:disabled { opacity: .55; cursor: default; }
+.rks-chev { flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); rotate: 45deg; translate: 0 -2px; transition: rotate .15s, translate .15s; }
+.rks-btn[aria-expanded="true"] { border-color: var(--accent); }
+.rks-btn[aria-expanded="true"] .rks-chev { rotate: 225deg; translate: 0 2px; }
+.rk-add-mat .rks-btn { width: 320px; max-width: 100%; }
+.rks-back { position: fixed; inset: 0; z-index: 95; background: rgba(5, 10, 24, .5); opacity: 0; transition: opacity .2s; }
+.rks-back.is-in { opacity: 1; }
+.rks-pop { position: fixed; z-index: 96; display: flex; flex-direction: column; background: var(--panel); color: var(--text); border: 1px solid var(--line2); box-shadow: 0 18px 44px rgba(5, 10, 24, .38); overflow: hidden; }
+.rks-pop[hidden], .rks-back[hidden] { display: none; }
+.rks-pop.is-drop { border-radius: var(--r-sm); }
+.rks-list { list-style: none; margin: 0; padding: 6px; overflow-y: auto; overscroll-behavior: contain; outline: none; -webkit-overflow-scrolling: touch; }
+.rks-opt { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 12px; border-radius: 9px; font-size: 15px; line-height: 1.3; cursor: pointer; }
+.rks-opt .rks-t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rks-opt:hover, .rks-opt.is-act { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.rks-opt.is-sel { font-weight: 600; color: var(--accent); }
+.rks-opt.is-dis { opacity: .45; cursor: default; }
+.rks-ck { flex: none; width: 16px; height: 9px; border-left: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; rotate: -45deg; translate: 0 -2px; opacity: 0; }
+.rks-opt.is-sel .rks-ck { opacity: 1; }
+.rks-pop.is-sheet { left: 0; right: 0; bottom: 0; top: auto; max-height: min(72vh, 560px); border-radius: 22px 22px 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); transform: translateY(100%); transition: transform .22s cubic-bezier(.2, .8, .2, 1); }
+.rks-pop.is-sheet.is-in { transform: translateY(0); }
+.rks-head { display: flex; align-items: center; gap: 10px; padding: 14px 8px 6px 20px; }
+.rks-head::before { content: ""; position: absolute; left: 50%; top: 7px; width: 38px; height: 4px; margin-left: -19px; border-radius: 4px; background: var(--line2); }
+.rks-title { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rks-x { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
+.rks-x svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.rks-pop.is-sheet .rks-opt { min-height: 52px; font-size: 16px; padding: 10px 14px; }
+html.rks-lock, html.rks-lock body { overflow: hidden; }
+@media print { .rks-pop, .rks-back { display: none !important; } }
+
+/* ---------- Скорость ---------- */
+/* Размытие фона под липкими панелями на телефоне заставляет перерисовывать экран при каждой прокрутке: заменяем его плотным фоном */
+@media (max-width: 1100px) {
+    .site-header, .rk-works, .rk-bar { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .site-header { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+    .rk-works { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+    .rk-island { -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }
+}
+

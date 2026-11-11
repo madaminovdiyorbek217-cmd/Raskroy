@@ -3,7 +3,7 @@
    Новая версия ставится в фоне и включается, когда пользователь нажмёт «Обновить». */
 'use strict';
 
-var VERSION = '21';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
+var VERSION = '24';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
 var CACHE = 'raskroy-v' + VERSION;
 var V = '?v=' + VERSION;
 
@@ -12,7 +12,7 @@ var ASSETS = [
     './css/reset.css' + V, './css/style.css' + V,
     './js/theme-init.js' + V, './js/ui.js' + V, './js/i18n.js' + V,
     './js/raskroy-core.js' + V, './js/raskroy.js' + V, './js/app.js' + V, './js/raskroy-worker.js' + V,
-    './js/fabric-i18n.js' + V, './js/look-i18n.js' + V, './js/look.js' + V, './js/fabric-core.js' + V, './js/fabric.js' + V,
+    './js/export.js' + V, './js/export-i18n.js' + V, './js/select.js' + V, './js/fabric-i18n.js' + V, './js/look-i18n.js' + V, './js/look.js' + V, './js/fabric-core.js' + V, './js/fabric.js' + V,
     './fonts/inter-400.woff', './fonts/inter-500.woff', './fonts/inter-600.woff', './fonts/inter-700.woff',
     './img/favicon.svg',
     './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'

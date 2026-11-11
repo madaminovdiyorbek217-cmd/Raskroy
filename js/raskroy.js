@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '21';
+    var VERSION = '24';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -766,7 +766,7 @@
                     '<div><dt>' + esc(t('r.parts')) + '</dt><dd>' + sh.pieces.length + '</dd></div>' +
                     '<div class="rk-tb-u"><dt>' + esc(t('r.used')) + '</dt><dd>' + fmt(sh.util * 100, 1) + '%</dd><i style="width:' + Math.min(100, sh.util * 100).toFixed(1) + '%"></i></div>' +
                     '<div><dt>' + esc(t('r.cut')) + '</dt><dd>' + fmt(sh.cuts / 1000, 1) + ' ' + t('u.m') + '</dd></div>' +
-                    '<div class="rk-tb-act"><button type="button" class="rk-btn rk-btn--ghost rk-btn--sm" data-svg="' + idx + ':' + (sh.index - 1) + '">' + esc(t('r.svg')) + '</button></div>' +
+                    '<div class="rk-tb-act"><button type="button" class="rk-btn rk-btn--ghost rk-btn--sm" data-png="' + idx + ':' + (sh.index - 1) + '">' + esc(t('r.svg')) + '</button><button type="button" class="rk-btn rk-btn--ghost rk-btn--sm only-desk" data-svg="' + idx + ':' + (sh.index - 1) + '">' + esc(t('r.svg2')) + '</button></div>' +
                     '</dl></div>';
             });
             html += '</div>';
@@ -809,6 +809,11 @@
                 var p = b.getAttribute('data-svg').split(':'); downloadSheet(+p[0], +p[1]);
             });
         });
+        $$('[data-png]', out).forEach(function (b) {
+            b.addEventListener('click', function () {
+                var p = b.getAttribute('data-png').split(':'); downloadSheetPng(+p[0], +p[1], b);
+            });
+        });
         $('#rk-csv-cut').disabled = !list.length;
         $('#rk-print').disabled = !list.length;
     }
@@ -848,16 +853,12 @@
     function plural(n, key) { return I.plural(n, key); }
 
     /* ---------- Экспорт ---------- */
-    function download(name, mime, text, bom) {
-        var blob = new Blob([bom ? '﻿' + text : text], { type: mime + ';charset=utf-8' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = name;
-        document.body.appendChild(a); a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    /* имя файла: латиницей, чтобы телефон и компьютер не заменяли русские буквы на «download» */
+    var TR = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'ў': 'u', 'қ': 'q', 'ғ': 'g', 'ҳ': 'h' };
+    function slug(s) {
+        var x = String(s || 'material').toLowerCase().replace(/[а-яёўқғҳ]/g, function (ch) { return TR[ch] != null ? TR[ch] : ''; });
+        return x.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'material';
     }
-    function csvCell(v) { v = String(v == null ? '' : v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
-    function csv(rows) { return rows.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n'); }
-    function slug(s) { return String(s || 'material').toLowerCase().replace(/[^a-z0-9а-яё]+/gi, '-').replace(/^-|-$/g, '') || 'material'; }
 
     function partsRows(st) {
         var rows = [t('csv.parts').split(';')];
@@ -878,12 +879,21 @@
     }
 
     $('#rk-csv-parts').addEventListener('click', function () {
-        download('detali.csv', 'text/csv', csv(partsRows(state)), true);
+        var btn = this;
+        runExport(btn, function () {
+            RKExport.save('detali-' + slug(workLabel(activeItem())) + '.xlsx', RKExport.xlsx([{ name: t('x.sheet.parts'), rows: partsRows(state) }]));
+            return t('x.done');
+        });
     });
 
     $('#rk-csv-cut').addEventListener('click', function () {
         if (!lastResult || !lastResult.length) return;
-        download('raskroy.csv', 'text/csv', csv(cutRows(lastResult)), true);
+        var btn = this;
+        runExport(btn, function () {
+            var it = activeItem();
+            RKExport.save('raskroy-' + slug(workLabel(it)) + '.xlsx', RKExport.xlsx(xlsxSheets([{ it: { state: state }, out: lastResult }])));
+            return t('x.done');
+        });
     });
 
     var FAVICON = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#2563eb"/><path d="M15 18h34v28H15zM15 32h22M37 18v28M37 39h12" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>');
@@ -903,52 +913,11 @@
     function downloadSheet(ri, si) {
         var r = lastResult && lastResult[ri]; if (!r) return;
         var sh = r.res.sheets[si]; if (!sh) return;
-        download('list-' + slug(r.mat.name) + '-' + sh.index + '.svg', 'image/svg+xml', fileSvg(r, sh, 'f' + ri + '-' + si), false);
+        RKExport.save('list-' + slug(r.mat.name) + '-' + sh.index + '.svg', new Blob([fileSvg(r, sh, 'f' + ri + '-' + si, state.settings.trim)], { type: 'image/svg+xml;charset=utf-8' }));
     }
 
-    /* ---------- ZIP без библиотек (файлы без сжатия: CSV и SVG небольшие) ---------- */
-    var CRC_T = (function () {
-        var tb = new Uint32Array(256);
-        for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); tb[n] = c >>> 0; }
-        return tb;
-    })();
-    function crc32(u8) {
-        var c = 0xFFFFFFFF;
-        for (var i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8);
-        return (c ^ 0xFFFFFFFF) >>> 0;
-    }
-    function makeZip(files) {
-        var enc = new TextEncoder(), parts = [], central = [], offset = 0, d = new Date();
-        var dt = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
-        var dd = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
-        files.forEach(function (f) {
-            var name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
-            var lh = new DataView(new ArrayBuffer(30));
-            lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
-            lh.setUint16(10, dt, true); lh.setUint16(12, dd, true); lh.setUint32(14, crc, true);
-            lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
-            parts.push(new Uint8Array(lh.buffer), name, data);
-            var ch = new DataView(new ArrayBuffer(46));
-            ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
-            ch.setUint16(12, dt, true); ch.setUint16(14, dd, true); ch.setUint32(16, crc, true);
-            ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true);
-            ch.setUint32(42, offset, true);
-            central.push(new Uint8Array(ch.buffer), name);
-            offset += 30 + name.length + data.length;
-        });
-        var csize = 0;
-        central.forEach(function (c) { csize += c.length; });
-        var end = new DataView(new ArrayBuffer(22));
-        end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
-        end.setUint32(12, csize, true); end.setUint32(16, offset, true);
-        return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/zip' });
-    }
-    function saveBlob(name, blob) {
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = name;
-        document.body.appendChild(a); a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    }
+    /* ZIP, Excel, PNG и PDF делает js/export.js */
+    var saveBlob = RKExport.save;
 
     /* ---------- Раздел «Мои работы» ---------- */
     var resCache = {};   /* расчёты не активных работ: id -> { sig, out } */
@@ -969,26 +938,6 @@
         });
     }
 
-    function workFiles(it, out, folder) {
-        var st = it.state, files = [], used = {};
-        function add(name, text) {
-            var n = name, k = 2;
-            while (used[n]) n = name.replace(/(\.[^.]+)$/, '-' + (k++) + '$1');
-            used[n] = 1;
-            files.push({ name: folder + n, text: text });
-        }
-        add('detali.csv', '﻿' + csv(partsRows(st)));
-        if (out.length) {
-            add('raskroy.csv', '﻿' + csv(cutRows(out)));
-            out.forEach(function (r, ri) {
-                r.res.sheets.forEach(function (sh) {
-                    add(slug(r.mat.name) + '-' + sh.index + '.svg', fileSvg(r, sh, 'z' + ri + '-' + sh.index, st.settings.trim));
-                });
-            });
-        }
-        return files;
-    }
-
     function dateStamp() {
         var d = new Date(), p2 = function (n) { return (n < 10 ? '0' : '') + n; };
         return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
@@ -999,32 +948,196 @@
         return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
     }
 
-    function downloadWork(it) {
-        toast(t('w.zipbusy'));
-        workResult(it, function (out) {
-            if (!out.length) { toast(t('w.none')); return; }
-            saveBlob('raskroy-' + slug(workLabel(it)) + '.zip', makeZip(workFiles(it, out, '')));
+    /* ---------- Экспорт работ: Excel, PNG, PDF, ZIP ---------- */
+    var exportBusy = false;
+    /* Запускает подготовку файла: пока она идёт, кнопка занята, потом показываем итог или понятную ошибку */
+    function runExport(btn, job) {
+        if (exportBusy) { toast(t('x.busy')); return; }
+        exportBusy = true;
+        if (btn) btn.classList.add('is-busy');
+        toast(t('x.busy'));
+        var pr;
+        try { pr = Promise.resolve(job()); } catch (e) { pr = Promise.reject(e); }
+        pr.then(function (msg) { toast(msg || t('x.done')); }, function (e) {
+            if (window.console) console.error(e);
+            toast(t('x.err'));
+        }).then(function () { exportBusy = false; if (btn) btn.classList.remove('is-busy'); });
+    }
+    function workResultP(it) { return new Promise(function (res) { workResult(it, res); }); }
+    function rnd(n, d) { var k = Math.pow(10, d || 0); return Math.round(n * k) / k; }
+
+    function sumRows(out) {
+        var rows = [];
+        out.forEach(function (r) {
+            var s = r.res.stats, mc = matCost(r.mat, s), tot = s.sheets * s.sheetArea;
+            rows.push([r.mat.name || t('m.fallback'), mmf(r.mat.l) + '×' + mmf(r.mat.w), s.sheets, s.pieces, rnd(tot ? s.usedArea / tot * 100 : 0, 1), rnd(s.cuts / 1000, 1), rnd(s.edge / 1000, 1), mc.priced ? Math.round(mc.total) : '']);
+        });
+        return rows;
+    }
+    /* items: [{it, out}] -> листы Excel; при нескольких работах добавляется столбец «Работа» */
+    function xlsxSheets(items) {
+        var multi = items.length > 1;
+        function head(h) { return multi ? [t('x.work')].concat(h) : h; }
+        var sum = [head([t('x.col.mat'), t('x.col.size'), t('x.col.sheets'), t('x.col.parts'), t('x.col.used'), t('x.col.cut'), t('x.col.edge'), t('x.col.cost')])];
+        var parts = [head(t('csv.parts').split(';'))], cut = [head(t('csv.cut').split(';'))];
+        items.forEach(function (x) {
+            var label = x.it.name != null || x.it.n != null ? workLabel(x.it) : '';
+            function add(dst, rows) { rows.slice(dst === sum ? 0 : 1).forEach(function (r) { dst.push(multi ? [label].concat(r) : r); }); }
+            add(sum, sumRows(x.out));
+            add(parts, partsRows(x.it.state));
+            add(cut, cutRows(x.out));
+        });
+        var sheets = [{ name: t('x.sheet.sum'), rows: sum }, { name: t('x.sheet.parts'), rows: parts }];
+        if (cut.length > 1) sheets.push({ name: t('x.sheet.cut'), rows: cut });
+        return sheets;
+    }
+
+    /* Карта листа как картинка: сверху подпись (материал, номер листа, использование), ниже сама карта */
+    async function sheetImage(r, sh, total, trim, uniq) {
+        var cv = await RKExport.svgToCanvas(fileSvg(r, sh, uniq, trim), 1800);
+        var H = 150, out = document.createElement('canvas');
+        out.width = cv.width; out.height = cv.height + H;
+        var x = out.getContext('2d');
+        x.fillStyle = '#ffffff'; x.fillRect(0, 0, out.width, out.height);
+        x.fillStyle = '#151a26'; x.textBaseline = 'alphabetic';
+        x.font = '700 50px ' + RKExport.FONT;
+        x.fillText((r.mat.name || t('m.fallback')) + ' · ' + t('x.pdf.sheetof', { i: sh.index, n: total }), 40, 66);
+        x.fillStyle = '#5b6478'; x.font = '400 34px ' + RKExport.FONT;
+        x.fillText(mmf(r.mat.l) + '×' + mmf(r.mat.w) + ' ' + t('u.mm') + ' · ' + t('r.parts') + ': ' + sh.pieces.length + ' · ' + t('r.used') + ': ' + fmt(sh.util * 100, 1) + '% · ' + t('r.cut') + ': ' + fmt(sh.cuts / 1000, 1) + ' ' + t('u.m'), 40, 116);
+        x.drawImage(cv, 0, H);
+        return out;
+    }
+
+    function downloadSheetPng(ri, si, btn) {
+        var r = lastResult && lastResult[ri]; if (!r) return;
+        var sh = r.res.sheets[si]; if (!sh) return;
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var cv = await sheetImage(r, sh, r.res.stats.sheets, state.settings.trim, 'p' + ri + '-' + si);
+            RKExport.save('list-' + slug(r.mat.name) + '-' + sh.index + '.png', await RKExport.toBlob(cv, 'image/png'));
+            return t('x.png.done');
         });
     }
 
-    function downloadAll() {
-        toast(t('w.zipbusy'));
-        var list = projects.list.slice(), i = 0, files = [], num = 0;
-        (function next() {
-            if (i >= list.length) {
-                if (!files.length) { toast(t('w.none')); return; }
-                saveBlob('raskroy-' + dateStamp() + '.zip', makeZip(files));
-                return;
+    /* Одна работа в PDF-документ: сводка, листы по одному на страницу, список деталей */
+    async function addWorkToDoc(doc, it, out, progress) {
+        var st = it.state, label = workLabel(it);
+        doc.h1(label);
+        doc.muted(t('x.pdf.title') + ' · ' + t('x.pdf.date') + ': ' + whenText(it.u || Date.now()).split(' ')[0]);
+        if (!out.length) { doc.space(10); doc.text(t('x.pdf.noparts')); return; }
+        var priced = out.some(function (r) { return matCost(r.mat, r.res.stats).priced; });
+        var cols = [{ label: t('x.col.mat'), w: 2.4 }, { label: t('x.col.size'), w: 2.2 }, { label: t('x.col.sheets'), w: 1.3, align: 'right' }, { label: t('x.col.parts'), w: 1.4, align: 'right' }, { label: t('x.col.used'), w: 2.2, align: 'right' }, { label: t('x.col.cut'), w: 1.2, align: 'right' }];
+        if (priced) cols.push({ label: t('x.col.cost'), w: 1.7, align: 'right' });
+        doc.space(14);
+        doc.table(cols, sumRows(out).map(function (r) { return priced ? [r[0], r[1], r[2], r[3], fmt(r[4], 1) + '%', fmt(r[5], 1), r[7] === '' ? '' : fmt(r[7])] : [r[0], r[1], r[2], r[3], fmt(r[4], 1) + '%', fmt(r[5], 1)]; }), { size: 23 });
+        var done = 0, count = 0;
+        out.forEach(function (r) { count += r.res.sheets.length; });
+        for (var ri = 0; ri < out.length; ri++) {
+            var r = out[ri];
+            for (var si = 0; si < r.res.sheets.length; si++) {
+                var sh = r.res.sheets[si];
+                doc.pageBreak();
+                doc.h2((r.mat.name || t('m.fallback')) + ' · ' + t('x.pdf.sheetof', { i: sh.index, n: r.res.stats.sheets }));
+                doc.muted(mmf(r.mat.l) + '×' + mmf(r.mat.w) + ' ' + t('u.mm') + ' · ' + t('r.parts') + ': ' + sh.pieces.length + ' · ' + t('r.used') + ': ' + fmt(sh.util * 100, 1) + '% · ' + t('r.cut') + ': ' + fmt(sh.cuts / 1000, 1) + ' ' + t('u.m'));
+                var cv = await RKExport.svgToCanvas(fileSvg(r, sh, 'd' + ri + '-' + si, st.settings.trim), 1500);
+                doc.image(cv, 760);
+                var rows = sh.pieces.slice().sort(function (a, b) { return a.id - b.id; }).map(function (p) { return [p.id, p.name || '', mmf(p.l) + ' × ' + mmf(p.dw), p.rot ? t('yes') : '']; });
+                doc.table([{ label: t('x.col.no'), w: 0.8 }, { label: t('x.col.name'), w: 4 }, { label: t('x.col.dim'), w: 2 }, { label: t('x.col.rot'), w: 1.2 }], rows, { size: 22, rh: 36 });
+                done++;
+                if (progress) progress(done, count);
+                await new Promise(function (res) { setTimeout(res, 0); });
             }
-            var it = list[i++];
-            workResult(it, function (out) {
-                if (out.length) {
-                    num++;
-                    files = files.concat(workFiles(it, out, (num < 10 ? '0' : '') + num + '-' + slug(workLabel(it)) + '/'));
-                }
-                next();
-            });
-        })();
+        }
+        doc.pageBreak();
+        doc.h2(t('x.pdf.list'));
+        var prow = partsRows(st).slice(1).map(function (r) { return [r[0], r[1], r[2], r[3] + ' × ' + r[4], r[5]]; });
+        doc.table([{ label: t('x.col.no'), w: 0.8 }, { label: t('x.col.name'), w: 3.6 }, { label: t('x.col.mat'), w: 3 }, { label: t('x.col.dim'), w: 2 }, { label: t('x.col.qty'), w: 0.9, align: 'right' }], prow, { size: 22, rh: 36 });
+    }
+
+    function downloadWorkPdf(it, btn) {
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var out = await workResultP(it);
+            if (!out.length) return t('x.none');
+            var doc = new RKExport.Doc({ footer: t('brand') + ' · ' + workLabel(it), title: workLabel(it) });
+            await addWorkToDoc(doc, it, out, function (i, n) { toast(t('x.progress', { i: i, n: n })); });
+            RKExport.save('raskroy-' + slug(workLabel(it)) + '.pdf', await doc.blob());
+        });
+    }
+    function downloadWorkXlsx(it, btn) {
+        runExport(btn, async function () {
+            var out = await workResultP(it);
+            RKExport.save('raskroy-' + slug(workLabel(it)) + '.xlsx', RKExport.xlsx(xlsxSheets([{ it: it, out: out }])));
+        });
+    }
+    /* ZIP остаётся для компьютера: Excel, PNG и SVG каждого листа */
+    async function workZipFiles(it, out, folder) {
+        var files = [], st = it.state, enc = new TextEncoder();
+        files.push({ name: folder + 'raskroy.xlsx', data: new Uint8Array(await RKExport.xlsx(xlsxSheets([{ it: it, out: out }])).arrayBuffer()) });
+        for (var ri = 0; ri < out.length; ri++) {
+            var r = out[ri];
+            for (var si = 0; si < r.res.sheets.length; si++) {
+                var sh = r.res.sheets[si], base = folder + slug(r.mat.name) + '-' + sh.index;
+                files.push({ name: base + '.svg', data: enc.encode(fileSvg(r, sh, 'z' + ri + '-' + si, st.settings.trim)) });
+                var cv = await sheetImage(r, sh, r.res.stats.sheets, st.settings.trim, 'zp' + ri + '-' + si);
+                files.push({ name: base + '.png', data: new Uint8Array(await (await RKExport.toBlob(cv, 'image/png')).arrayBuffer()) });
+            }
+        }
+        return files;
+    }
+    function downloadAllZip(btn) {
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var files = [], num = 0;
+            for (var i = 0; i < projects.list.length; i++) {
+                var it = projects.list[i], out = await workResultP(it);
+                if (!out.length) continue;
+                num++;
+                files = files.concat(await workZipFiles(it, out, (num < 10 ? '0' : '') + num + '-' + slug(workLabel(it)) + '/'));
+            }
+            if (!files.length) return t('x.none');
+            RKExport.save('raskroy-' + dateStamp() + '.zip', RKExport.zip(files));
+        });
+    }
+    function downloadAllXlsx(btn) {
+        runExport(btn, async function () {
+            var items = [];
+            for (var i = 0; i < projects.list.length; i++) {
+                var it = projects.list[i], out = await workResultP(it);
+                if (out.length) items.push({ it: it, out: out });
+            }
+            if (!items.length) return t('x.none');
+            RKExport.save('raskroy-' + dateStamp() + '.xlsx', RKExport.xlsx(xlsxSheets(items)));
+        });
+    }
+    /* «Скачать всё одним файлом»: один PDF со всеми работами (на телефоне нет папок и архивов) */
+    function downloadAllPdf(btn) {
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var items = [];
+            for (var i = 0; i < projects.list.length; i++) {
+                var it = projects.list[i], out = await workResultP(it);
+                if (out.length) items.push({ it: it, out: out });
+            }
+            if (!items.length) return t('x.none');
+            var doc = new RKExport.Doc({ footer: t('brand') + ' · ' + dateStamp(), title: t('x.pdf.all') });
+            if (items.length > 1) {
+                doc.h1(t('x.pdf.all'));
+                doc.muted(dateStamp());
+                doc.space(14);
+                doc.table([{ label: t('x.work'), w: 4 }, { label: t('x.col.sheets'), w: 1.2, align: 'right' }, { label: t('x.col.parts'), w: 1.2, align: 'right' }, { label: t('x.col.used'), w: 1.8, align: 'right' }],
+                    items.map(function (x) {
+                        var sh = 0, pc = 0, used = 0, tot = 0;
+                        x.out.forEach(function (r) { sh += r.res.stats.sheets; pc += r.res.stats.pieces; used += r.res.stats.usedArea; tot += r.res.stats.sheets * r.res.stats.sheetArea; });
+                        return [workLabel(x.it), sh, pc, fmt(tot ? used / tot * 100 : 0, 1) + '%'];
+                    }));
+            }
+            for (var k = 0; k < items.length; k++) {
+                if (items.length > 1 || k > 0) doc.pageBreak();
+                await addWorkToDoc(doc, items[k].it, items[k].out, function (i, n) { toast(t('x.progress', { i: i, n: n }) + ' (' + (k + 1) + '/' + items.length + ')'); });
+            }
+            RKExport.save('raskroy-' + dateStamp() + '.pdf', await doc.blob());
+        });
     }
 
     function renderWorks() {
@@ -1052,9 +1165,19 @@
                 });
                 acts.appendChild(ob);
             }
-            var db = el('button', 'rk-btn rk-btn--ghost', { type: 'button' }); db.textContent = t('w.dl') + ' ZIP';
-            db.addEventListener('click', function () { downloadWork(it); });
-            acts.appendChild(db);
+            [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.zip', ' only-desk', null]].forEach(function (d) {
+                var db = el('button', 'rk-btn rk-btn--ghost' + d[1], { type: 'button' }); db.textContent = t(d[0]);
+                db.addEventListener('click', function () {
+                    if (d[2]) d[2](it, db);
+                    else runExport(db, async function () {
+                        await RKExport.fontsReady();
+                        var out = await workResultP(it);
+                        if (!out.length) return t('x.none');
+                        RKExport.save('raskroy-' + slug(workLabel(it)) + '.zip', RKExport.zip(await workZipFiles(it, out, '')));
+                    });
+                });
+                acts.appendChild(db);
+            });
             if (many) {
                 var xb = el('button', 'rk-btn rk-btn--danger', { type: 'button', 'aria-label': t('w.close', { name: workLabel(it) }) }); xb.textContent = t('w.del');
                 xb.addEventListener('click', function () { closeWork(it.id); });
@@ -1457,7 +1580,9 @@
     $('#rk-restore').addEventListener('click', function () { restFile.value = ''; restFile.click(); });
     restFile.addEventListener('change', function () { if (restFile.files && restFile.files[0]) restoreFile(restFile.files[0]); });
 
-    $('#rk-zip-all').addEventListener('click', downloadAll);
+    $('#rk-zip-all').addEventListener('click', function () { downloadAllPdf(this); });
+    $('#rk-xlsx-all').addEventListener('click', function () { downloadAllXlsx(this); });
+    $('#rk-zip-desk').addEventListener('click', function () { downloadAllZip(this); });
 
     /* список обновляем, когда раздел попадает на экран, и при любых действиях с вкладками */
     var worksSec = document.getElementById('rk-works');
@@ -1512,7 +1637,14 @@
             box.appendChild(tab);
         });
         var cur = $('.rk-tab.is-active', box);
-        if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* не страшно */ } }
+        if (cur) {
+            /* двигаем только ленту вкладок: scrollIntoView заставлял браузер пересчитывать всю страницу */
+            window.requestAnimationFrame(function () {
+                var l = cur.offsetLeft, r = l + cur.offsetWidth;
+                if (l < box.scrollLeft) box.scrollLeft = Math.max(0, l - 8);
+                else if (r > box.scrollLeft + box.clientWidth) box.scrollLeft = r - box.clientWidth + 8;
+            });
+        }
         $('#rk-print-name').textContent = workLabel(activeItem());
     }
 
@@ -1596,7 +1728,7 @@
     renderTabs();
     updateBar();
 
-    window.RKApp = { importFile: importFile, newWork: newWork, backup: downloadBackup, toast: toast, version: VERSION };
+    window.RKApp = { slug: slug, importFile: importFile, newWork: newWork, backup: downloadBackup, toast: toast, version: VERSION };
 
     function boot() { run(350); }
     if (window.Raskroy) boot();

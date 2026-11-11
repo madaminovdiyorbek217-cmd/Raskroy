@@ -1,5 +1,5 @@
-# Замените YOUR-DOMAIN.com на адрес вашего сайта
+# Адрес сайта указан ниже; при смене адреса поправьте его
 User-agent: *
 Allow: /
 
-Sitemap: https://YOUR-DOMAIN.com/sitemap.xml
+Sitemap: https://madaminovdiyorbek217-cmd.github.io/Raskroy/sitemap.xml

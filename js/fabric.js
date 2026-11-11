@@ -147,7 +147,14 @@
             box.appendChild(tab);
         });
         var cur = $('.rk-tab.is-active', box);
-        if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* не страшно */ } }
+        if (cur) {
+            /* двигаем только ленту вкладок: scrollIntoView заставлял браузер пересчитывать всю страницу */
+            window.requestAnimationFrame(function () {
+                var l = cur.offsetLeft, r = l + cur.offsetWidth;
+                if (l < box.scrollLeft) box.scrollLeft = Math.max(0, l - 8);
+                else if (r > box.scrollLeft + box.clientWidth) box.scrollLeft = r - box.clientWidth + 8;
+            });
+        }
     }
     function switchTo(id) { saveNow(); state.active = id; saveNow(); renderAll(); }
     function newFabric() {
@@ -429,7 +436,7 @@
                 return '<li>' + esc(t('fb.warn.wide', { name: partName(f.parts[b.pi], b.pi), need: dimU(b.need) + ' ' + uName(), have: dimU(b.have) + ' ' + uName() })) + '</li>';
             }).join('') + '</ul>';
         } else { warn.hidden = true; warn.innerHTML = ''; }
-        $('#fb-svg').disabled = $('#fb-copy').disabled = !r.count;
+        $('#fb-svg').disabled = $('#fb-copy').disabled = $('#fb-png').disabled = $('#fb-pdf').disabled = $('#fb-xlsx').disabled = !r.count;
 
         if (!f.roll) { sum.innerHTML = ''; draw.innerHTML = '<p class="rk-hint">' + esc(t('fb.r.noroll')) + '</p>'; tot.innerHTML = ''; updateBar(); return; }
         if (!r.count) {
@@ -479,17 +486,85 @@
     }
 
     /* ---------- Кнопки результата ---------- */
-    function saveBlob(name, blob) {
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = name;
-        document.body.appendChild(a); a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    var busy = false;
+    function run(btn, job) {
+        if (busy) { toast(t('x.busy')); return; }
+        busy = true; btn.classList.add('is-busy'); toast(t('x.busy'));
+        var pr;
+        try { pr = Promise.resolve(job()); } catch (e) { pr = Promise.reject(e); }
+        pr.then(function (msg) { toast(msg || t('x.done')); }, function (e) { if (window.console) console.error(e); toast(t('x.err')); })
+            .then(function () { busy = false; btn.classList.remove('is-busy'); });
     }
+    function fileName(f, ext) { return 'fabric-' + (window.RKApp && window.RKApp.slug ? window.RKApp.slug(label(f)) : 'raskroy') + '.' + ext; }
+    /* Картинка раскладки: заголовок и итоги сверху, сама раскладка ниже */
+    async function fabricImage(f, c) {
+        var cv = await RKExport.svgToCanvas(buildSvg(f, c, true, false), 2000);
+        var H = 170, out = document.createElement('canvas');
+        out.width = cv.width; out.height = cv.height + H;
+        var x = out.getContext('2d');
+        x.fillStyle = '#ffffff'; x.fillRect(0, 0, out.width, out.height);
+        x.fillStyle = '#151a26'; x.font = '700 56px ' + RKExport.FONT;
+        x.fillText(label(f) + ' — ' + meters(c.o.ordered) + ' ' + t('fb.m'), 40, 74);
+        x.fillStyle = '#5b6478'; x.font = '400 36px ' + RKExport.FONT;
+        x.fillText(t('fb.roll', { w: nf(f.roll / F(), 1), u: uName(), l: meters(c.r.length / 1000) }) + ' · ' + t('fb.r.util') + ': ' + nf(c.r.util * 100, 0) + ' %', 40, 128);
+        x.drawImage(cv, 0, H);
+        return out;
+    }
+    function fabricRows(f, c) {
+        var rows = [[t('x.col.no'), t('x.col.name'), t('fb.p.l', { u: uName() }), t('fb.p.w', { u: uName() }), t('x.col.qty')]];
+        f.parts.forEach(function (p, i) { rows.push([i + 1, partName(p, i), p.l / F(), p.w / F(), p.q]); });
+        return rows;
+    }
+    function fabricSummary(list) {
+        var head = [t('fb.total.fabric'), t('fb.f.roll', { u: uName() }), t('fb.r.layout') + ', ' + t('fb.m'), t('fb.r.order') + ', ' + t('fb.m'), t('fb.r.util') + ', %', t('fb.r.parts'), t('x.col.cost') + ', ' + state.cur];
+        var rows = [head];
+        list.forEach(function (f) {
+            var c = calc(f);
+            rows.push([label(f), f.roll / F(), c.r.count ? Math.round(c.o.base * 100) / 100 : 0, c.r.count ? Math.round(c.o.ordered * 100) / 100 : 0, Math.round(c.r.util * 1000) / 10, c.r.count, c.cost ? Math.round(c.cost) : '']);
+        });
+        return rows;
+    }
+    $('#fb-png').addEventListener('click', function () {
+        var f = active(), c = calc(f); if (!c.r.count) return;
+        run(this, async function () {
+            await RKExport.fontsReady();
+            RKExport.save(fileName(f, 'png'), await RKExport.toBlob(await fabricImage(f, c), 'image/png'));
+            return t('x.png.done');
+        });
+    });
+    $('#fb-pdf').addEventListener('click', function () {
+        var f = active(), c = calc(f); if (!c.r.count) return;
+        run(this, async function () {
+            await RKExport.fontsReady();
+            var doc = new RKExport.Doc({ footer: t('brand') + ' · ' + label(f), title: label(f) });
+            doc.h1(t('fb.h1'));
+            doc.muted(label(f));
+            doc.space(14);
+            var sum = fabricSummary([f])[1];
+            doc.table([{ label: t('fb.r.order') + ', ' + t('fb.m'), w: 1.7, align: 'right' }, { label: t('fb.r.layout') + ', ' + t('fb.m'), w: 1.9, align: 'right' }, { label: t('x.col.used'), w: 1.8, align: 'right' }, { label: t('fb.r.parts'), w: 1.3, align: 'right' }, { label: t('x.col.cost') + ', ' + state.cur, w: 1.8, align: 'right' }],
+                [[meters(sum[3]), meters(sum[2]), nf(sum[4], 1), nfg(sum[5]), sum[6] === '' ? '—' : money(sum[6])]]);
+            doc.space(12);
+            doc.text(t('fb.roll', { w: nf(f.roll / F(), 1), u: uName(), l: meters(c.r.length / 1000) }));
+            doc.space(10);
+            doc.image(await RKExport.svgToCanvas(buildSvg(f, c, true, false), 1800), 700);
+            doc.space(14);
+            doc.table([{ label: t('x.col.no'), w: 0.8 }, { label: t('x.col.name'), w: 4 }, { label: t('fb.p.l', { u: uName() }), w: 1.6, align: 'right' }, { label: t('fb.p.w', { u: uName() }), w: 1.6, align: 'right' }, { label: t('x.col.qty'), w: 0.9, align: 'right' }],
+                f.parts.map(function (p, i) { return [i + 1, partName(p, i), inU(p.l), inU(p.w), p.q]; }), { size: 22, rh: 36 });
+            RKExport.save(fileName(f, 'pdf'), await doc.blob());
+        });
+    });
+    $('#fb-xlsx').addEventListener('click', function () {
+        var f = active(), c = calc(f); if (!c.r.count) return;
+        run(this, function () {
+            var sheets = [{ name: t('x.sheet.sum'), rows: fabricSummary(state.list) }];
+            state.list.forEach(function (g) { sheets.push({ name: label(g), rows: fabricRows(g, calc(g)) }); });
+            RKExport.save(fileName(f, 'xlsx'), RKExport.xlsx(sheets));
+        });
+    });
     $('#fb-svg').addEventListener('click', function () {
         var f = active(), c = calc(f);
         if (!c.r.count) return;
-        var name = (t('fb.file') + '-' + label(f)).replace(/[\\/:*?"<>|\s]+/g, '-').slice(0, 80) + '.svg';
-        saveBlob(name, new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + buildSvg(f, c, true, false)], { type: 'image/svg+xml' }));
+        RKExport.save(fileName(f, 'svg'), new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + buildSvg(f, c, true, false)], { type: 'image/svg+xml;charset=utf-8' }));
     });
     $('#fb-copy').addEventListener('click', function () {
         var text = summaryText();
