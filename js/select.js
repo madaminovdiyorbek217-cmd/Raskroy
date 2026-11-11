@@ -95,7 +95,7 @@
         if (openFor) close(false);
         sync(sel);
         var b = sel._rks, opts = sel.options;
-        sheetMode = coarse();
+        sheetMode = false; /* на телефоне тоже выпадает под полем: так список выглядит частью приложения, а не окном системы */
         openFor = sel; activeIdx = sel.selectedIndex;
         pop.innerHTML = '';
         pop.className = 'rks-pop ' + (sheetMode ? 'is-sheet' : 'is-drop');
@@ -124,7 +124,10 @@
             doc.documentElement.classList.add('rks-lock');
             requestAnimationFrame(function () { pop.classList.add('is-in'); backdrop.classList.add('is-in'); });
         } else {
+            /* прозрачная подложка: касание мимо списка только закрывает его и не нажимает кнопку под ним */
+            backdrop.hidden = false; backdrop.classList.add('is-clear');
             place(b);
+            requestAnimationFrame(function () { pop.classList.add('is-in'); });
         }
         var cur = ul.querySelector('.is-sel');
         if (cur) { try { ul.scrollTop = Math.max(0, cur.offsetTop - ul.clientHeight / 2 + cur.offsetHeight / 2); } catch (e) { /* не страшно */ } }
@@ -142,7 +145,7 @@
         var up = below < Math.min(want, 200) && above > below;
         var h = Math.max(120, Math.min(want, up ? above : below));
         pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - Math.max(r.width, 180) - 8)) + 'px';
-        pop.style.minWidth = r.width + 'px';
+        pop.style.minWidth = r.width + 'px'; pop.style.maxWidth = (window.innerWidth - 16) + 'px';
         pop.style.maxHeight = h + 'px';
         if (up) { pop.style.top = 'auto'; pop.style.bottom = (vh - r.top + 6) + 'px'; }
         else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 6) + 'px'; }
@@ -157,7 +160,7 @@
         window.removeEventListener('resize', onResize);
         window.removeEventListener('scroll', onScroll, true);
         doc.documentElement.classList.remove('rks-lock');
-        pop.classList.remove('is-in'); backdrop.classList.remove('is-in');
+        pop.classList.remove('is-in'); backdrop.classList.remove('is-in', 'is-clear');
         var p = pop, bd = backdrop;
         var wasSheet = sheetMode;
         if (wasSheet) setTimeout(function () { if (!openFor) { p.hidden = true; bd.hidden = true; } }, 200);

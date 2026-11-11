@@ -492,7 +492,7 @@
         busy = true; btn.classList.add('is-busy'); toast(t('x.busy'));
         var pr;
         try { pr = Promise.resolve(job()); } catch (e) { pr = Promise.reject(e); }
-        pr.then(function (msg) { toast(msg || t('x.done')); }, function (e) { if (window.console) console.error(e); toast(t('x.err')); })
+        pr.then(function (msg) { if (!RKExport.offering()) toast(msg || t('x.done')); }, function (e) { if (window.console) console.error(e); toast(t('x.err')); })
             .then(function () { busy = false; btn.classList.remove('is-busy'); });
     }
     function fileName(f, ext) { return 'fabric-' + (window.RKApp && window.RKApp.slug ? window.RKApp.slug(label(f)) : 'raskroy') + '.' + ext; }

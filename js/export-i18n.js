@@ -61,3 +61,13 @@
     var T = { ru: { 'sel.close': 'Закрыть' }, en: { 'sel.close': 'Close' }, uz: { 'sel.close': 'Yopish' } };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'x.ready': 'Файл готов', 'x.share': 'Поделиться или отправить', 'x.savephone': 'Сохранить на телефон', 'x.close': 'Закрыть', 'x.kb': 'КБ', 'x.mb': 'МБ' },
+        en: { 'x.ready': 'File is ready', 'x.share': 'Share or send', 'x.savephone': 'Save to phone', 'x.close': 'Close', 'x.kb': 'KB', 'x.mb': 'MB' },
+        uz: { 'x.ready': 'Fayl tayyor', 'x.share': 'Ulashish yoki yuborish', 'x.savephone': 'Telefonga saqlash', 'x.close': 'Yopish', 'x.kb': 'KB', 'x.mb': 'MB' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

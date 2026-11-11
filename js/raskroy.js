@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '24';
+    var VERSION = '25';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -958,7 +958,7 @@
         toast(t('x.busy'));
         var pr;
         try { pr = Promise.resolve(job()); } catch (e) { pr = Promise.reject(e); }
-        pr.then(function (msg) { toast(msg || t('x.done')); }, function (e) {
+        pr.then(function (msg) { if (!RKExport.offering()) toast(msg || t('x.done')); }, function (e) {
             if (window.console) console.error(e);
             toast(t('x.err'));
         }).then(function () { exportBusy = false; if (btn) btn.classList.remove('is-busy'); });

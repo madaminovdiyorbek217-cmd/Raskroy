@@ -310,12 +310,66 @@
     };
 
     /* ---------- Сохранение ---------- */
-    function save(name, blob) {
+    function download(name, blob) {
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = name;
         document.body.appendChild(a); a.click();
         setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
     }
+    function tr(key, fb) {
+        try { var v = window.RKI18N && window.RKI18N.t ? window.RKI18N.t(key) : ''; return v && v !== key ? v : fb; } catch (e) { return fb; }
+    }
+    function sizeText(n) { return n < 1048576 ? Math.max(1, Math.round(n / 1024)) + ' ' + tr('x.kb', 'КБ') : (n / 1048576).toFixed(1).replace('.', ',') + ' ' + tr('x.mb', 'МБ'); }
+    function isPhone() {
+        try { return window.matchMedia('(hover: none) and (pointer: coarse)').matches; } catch (e) { return false; }
+    }
+    function mkFile(name, blob) {
+        try { return new File([blob], name, { type: blob.type || 'application/octet-stream' }); } catch (e) { return null; }
+    }
+    function canShareFile(file) {
+        try { return !!(file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })); } catch (e) { return false; }
+    }
+    var offerEl = null;
+    function closeOffer() { if (offerEl) { offerEl.remove(); offerEl = null; document.documentElement.classList.remove('rkx-lock'); } }
+    /* На телефоне вместо системного окна «Загрузка завершена» показываем своё окно «Файл готов»:
+       «Поделиться» открывает обычное меню Android (Telegram, Файлы, почта), «Сохранить» скачивает файл. */
+    function offer(name, blob, file) {
+        closeOffer();
+        var tt = document.querySelector('.rk-toast'); if (tt) tt.classList.remove('is-on');
+        var ext = (name.split('.').pop() || '').toUpperCase();
+        var wrap = document.createElement('div'); wrap.className = 'rkx-wrap'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+        wrap.innerHTML = '<div class="rkx-card"><div class="rkx-ico"><span></span></div><div class="rkx-h"></div><div class="rkx-n"></div><div class="rkx-m"></div>' +
+            '<button type="button" class="rk-btn rk-btn--main rkx-share"></button>' +
+            '<button type="button" class="rk-btn rk-btn--ghost rkx-save"></button>' +
+            '<button type="button" class="rkx-close"></button></div>';
+        var q = function (c) { return wrap.querySelector(c); };
+        q('.rkx-ico span').textContent = ext;
+        q('.rkx-h').textContent = tr('x.ready', 'Файл готов');
+        q('.rkx-n').textContent = name;
+        q('.rkx-m').textContent = sizeText(blob.size);
+        q('.rkx-share').textContent = tr('x.share', 'Поделиться или отправить');
+        q('.rkx-save').textContent = tr('x.savephone', 'Сохранить на телефон');
+        q('.rkx-close').textContent = tr('x.close', 'Закрыть');
+        q('.rkx-share').addEventListener('click', function () {
+            navigator.share({ files: [file], title: name }).then(closeOffer, function (e) {
+                if (e && e.name === 'AbortError') return;
+                download(name, blob); closeOffer();
+            });
+        });
+        q('.rkx-save').addEventListener('click', function () { download(name, blob); closeOffer(); });
+        q('.rkx-close').addEventListener('click', closeOffer);
+        wrap.addEventListener('click', function (e) { if (e.target === wrap) closeOffer(); });
+        document.body.appendChild(wrap);
+        document.documentElement.classList.add('rkx-lock');
+        offerEl = wrap;
+        try { q('.rkx-share').focus({ preventScroll: true }); } catch (e) { /* не страшно */ }
+    }
+    function save(name, blob) {
+        var file = isPhone() ? mkFile(name, blob) : null;
+        if (file && canShareFile(file)) { offer(name, blob, file); return; }
+        download(name, blob);
+    }
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && offerEl) closeOffer(); });
     function fontsReady() {
         try {
             if (document.fonts && document.fonts.load) {
@@ -325,5 +379,5 @@
         return Promise.resolve();
     }
 
-    window.RKExport = { zip: zip, xlsx: xlsx, svgToCanvas: svgToCanvas, toBlob: toBlob, Doc: Doc, save: save, fontsReady: fontsReady, crc32: crc32, FONT: FONT };
+    window.RKExport = { zip: zip, xlsx: xlsx, svgToCanvas: svgToCanvas, toBlob: toBlob, Doc: Doc, save: save, offering: function () { return !!offerEl; }, fontsReady: fontsReady, crc32: crc32, FONT: FONT };
 })();
