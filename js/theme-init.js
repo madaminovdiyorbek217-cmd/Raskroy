@@ -8,6 +8,16 @@ if (window.top !== window.self) {
 /* Тема оформления: подключается в <head> до отрисовки страницы, чтобы не было вспышки не того цвета.
    Темы: light (светлая), navy (тёмно-синяя), black (чёрная). Старое значение dark считается чёрной. */
 (function () {
+    /* Белый как основной вид: один раз переключаем на светлую тему с белым фоном (дальше выбор пользователя не трогаем) */
+    try {
+        if (!localStorage.getItem('rk-white-v1')) {
+            localStorage.setItem('rk-white-v1', '1');
+            localStorage.setItem('theme', 'light');
+            var lk0 = {}; try { lk0 = JSON.parse(localStorage.getItem('rk-look') || '{}') || {}; } catch (e0) { lk0 = {}; }
+            lk0.bg = 'white';
+            localStorage.setItem('rk-look', JSON.stringify(lk0));
+        }
+    } catch (e) { /* хранилище недоступно */ }
     var t = null;
     try { t = localStorage.getItem('theme'); } catch (e) { /* хранилище недоступно */ }
     if (t === 'dark') t = 'black';
@@ -80,6 +90,18 @@ if (window.top !== window.self) {
         { id: 'dawn', tone: 'l', c: '#f9e3ea', img: 'linear-gradient(135deg,#ffe8d6 0%,#fbd9e8 50%,#dcdcfb 100%)', n: N('Рассвет', 'Dawn', 'Tong') },
         { id: 'lagoon', tone: 'l', c: '#dff2f2', img: 'linear-gradient(135deg,#d9f4ee 0%,#dbe9ff 100%)', n: N('Лагуна', 'Lagoon', 'Laguna') },
         { id: 'cloud', tone: 'l', c: '#e8edf8', img: 'linear-gradient(180deg,#f6f8ff 0%,#dbe3f4 100%)', n: N('Облако', 'Cloud', 'Bulut') },
+        { id: 'snow', tone: 'l', c: '#fafafa', n: N('Снег', 'Snow', 'Qor') },
+        { id: 'pearl', tone: 'l', c: '#f1f3f7', n: N('Жемчуг', 'Pearl', 'Injui') },
+        { id: 'silver', tone: 'l', c: '#d9dde3', n: N('Серебро', 'Silver', 'Kumush') },
+        { id: 'ivory', tone: 'l', c: '#fffbea', n: N('Слоновая кость', 'Ivory', 'Fil suyagi') },
+        { id: 'lemon', tone: 'l', c: '#fdf3b8', n: N('Лимон', 'Lemon', 'Limon') },
+        { id: 'apricot', tone: 'l', c: '#fcd9b0', n: N('Абрикос', 'Apricot', 'O‘rik') },
+        { id: 'sage', tone: 'l', c: '#dde8d5', n: N('Шалфей', 'Sage', 'Marmarak') },
+        { id: 'aqua', tone: 'l', c: '#cdeef0', n: N('Аква', 'Aqua', 'Akva') },
+        { id: 'ice', tone: 'l', c: '#d6e6fb', n: N('Лёд', 'Ice', 'Muz') },
+        { id: 'periwinkle', tone: 'l', c: '#d9dcf8', n: N('Барвинок', 'Periwinkle', 'Zangori') },
+        { id: 'orchid', tone: 'l', c: '#f1d9f4', n: N('Орхидея', 'Orchid', 'Orxideya') },
+        { id: 'blush', tone: 'l', c: '#f8d3d0', n: N('Румянец', 'Blush', 'Qizg‘ish') },
         { id: 'graphite', tone: 'd', c: '#16181d', n: N('Графит', 'Graphite', 'Grafit') },
         { id: 'steel', tone: 'd', c: '#1a2231', n: N('Сталь', 'Steel', 'Po‘lat') },
         { id: 'ocean', tone: 'd', c: '#06222c', n: N('Океан', 'Ocean', 'Okean') },
@@ -91,6 +113,16 @@ if (window.top !== window.self) {
         { id: 'aurora', tone: 'd', c: '#0a1c33', img: 'linear-gradient(160deg,#07162b 0%,#0e2f4f 50%,#0f3d3a 100%)', n: N('Аврора', 'Aurora', 'Aurora') },
         { id: 'sunset', tone: 'd', c: '#22123a', img: 'linear-gradient(160deg,#1a1033 0%,#3a1c4d 55%,#5c2b3e 100%)', n: N('Закат', 'Sunset', 'Shafaq') },
         { id: 'space', tone: 'd', c: '#070a1a', img: 'radial-gradient(900px 600px at 85% -10%,#1e2a66 0%,transparent 60%),radial-gradient(700px 500px at 0% 105%,#3a1466 0%,transparent 55%)', n: N('Космос', 'Space', 'Kosmos') },
+        { id: 'black', tone: 'd', c: '#000000', n: N('Чёрный', 'Black', 'Qora') },
+        { id: 'charcoal', tone: 'd', c: '#202226', n: N('Уголь', 'Charcoal', 'Ko‘mir') },
+        { id: 'midnight', tone: 'd', c: '#0b1020', n: N('Полночь', 'Midnight', 'Yarim tun') },
+        { id: 'navy2', tone: 'd', c: '#0a1930', n: N('Морской', 'Navy', 'Dengiz') },
+        { id: 'indigo', tone: 'd', c: '#14143a', n: N('Индиго', 'Indigo', 'Indigo') },
+        { id: 'teal', tone: 'd', c: '#082a2a', n: N('Тёмная бирюза', 'Deep teal', 'Qora firuza') },
+        { id: 'moss', tone: 'd', c: '#16240f', n: N('Мох', 'Moss', 'Moxor') },
+        { id: 'eggplant', tone: 'd', c: '#241033', n: N('Баклажан', 'Eggplant', 'Baqlajon') },
+        { id: 'maroon', tone: 'd', c: '#2a0d12', n: N('Мареновый', 'Maroon', 'To‘q qizil') },
+        { id: 'chocolate', tone: 'd', c: '#2a1a12', n: N('Шоколад', 'Chocolate', 'Shokolad') },
         { id: 'ember', tone: 'd', c: '#1f0f10', img: 'linear-gradient(160deg,#1c0d12 0%,#3a1713 60%,#4d2412 100%)', n: N('Угли', 'Embers', 'Cho‘g‘') }
     ];
     var ACC = [
@@ -108,7 +140,19 @@ if (window.top !== window.self) {
         { id: 'rose', c: '#f43f5e', n: N('Коралловый', 'Coral', 'Marjon') },
         { id: 'red', c: '#ef4444', n: N('Красный', 'Red', 'Qizil') },
         { id: 'orange', c: '#f97316', n: N('Оранжевый', 'Orange', 'Zarg‘aldoq') },
-        { id: 'slate', c: '#64748b', n: N('Графитовый', 'Slate', 'Kulrang') }
+        { id: 'slate', c: '#64748b', n: N('Графитовый', 'Slate', 'Kulrang') },
+        { id: 'navyb', c: '#1d4ed8', n: N('Тёмно-синий', 'Navy blue', 'To‘q ko‘k') },
+        { id: 'mint', c: '#2dd4bf', n: N('Мятный', 'Mint', 'Yalpiz rang') },
+        { id: 'lime', c: '#84cc16', n: N('Салатовый', 'Lime', 'Och yashil') },
+        { id: 'yellow', c: '#eab308', n: N('Жёлтый', 'Yellow', 'Sariq') },
+        { id: 'gold', c: '#ca8a04', n: N('Золотой', 'Gold', 'Oltin') },
+        { id: 'amber', c: '#f59e0b', n: N('Янтарный', 'Amber', 'Qahrabo') },
+        { id: 'rust', c: '#c2410c', n: N('Ржавый', 'Rust', 'Zang') },
+        { id: 'brown', c: '#92400e', n: N('Коричневый', 'Brown', 'Jigarrang') },
+        { id: 'crimson', c: '#be123c', n: N('Малиновый', 'Crimson', 'Malina') },
+        { id: 'magenta', c: '#c026d3', n: N('Маджента', 'Magenta', 'Majenta') },
+        { id: 'steel', c: '#475569', n: N('Сталь', 'Steel', 'Po‘lat') },
+        { id: 'ink', c: '#0f172a', n: N('Чернильный', 'Ink', 'Siyoh') }
     ];
     function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 

@@ -64,8 +64,8 @@
         var customBg = !!look.bg && !bgId, customAcc = !!look.accent && !aId;
         bgPick.closest('.lk-pick').classList.toggle('is-on', customBg);
         accPick.closest('.lk-pick').classList.toggle('is-on', customAcc);
-        if (customBg) { bgPick.value = look.bg; bgHex.textContent = look.bg.toUpperCase(); } else bgHex.textContent = '';
-        if (customAcc) { accPick.value = look.accent; accHex.textContent = look.accent.toUpperCase(); } else accHex.textContent = '';
+        bgHex.textContent = customBg ? look.bg.toUpperCase() : '';
+        accHex.textContent = customAcc ? look.accent.toUpperCase() : '';
         /* выбранные цвета показываем и в самих «своих» плитках */
         bgPick.closest('.lk-pick').style.setProperty('--pick', customBg ? look.bg : '');
         accPick.closest('.lk-pick').style.setProperty('--pick', customAcc ? look.accent : '');
@@ -110,9 +110,30 @@
             var n = list[(i + d + list.length) % list.length]; n.focus(); n.click();
         });
     });
-    var bgTimer, accTimer;
-    bgPick.addEventListener('input', function () { look.bg = bgPick.value; clearTimeout(bgTimer); L.apply(look); mark(); bgTimer = setTimeout(commit, 120); });
-    accPick.addEventListener('input', function () { look.accent = accPick.value; clearTimeout(accTimer); L.apply(look); mark(); accTimer = setTimeout(commit, 120); });
+    /* «Свой цвет»: наше окно выбора, цвет применяется сразу, «Отмена» возвращает прежний */
+    var pickTimer;
+    function pickCustom(kind) {
+        var before = { bg: look.bg, accent: look.accent };
+        var cur = kind === 'bg' ? (look.bg && !L.byId(L.BG, look.bg) ? look.bg : ((L.byId(L.BG, look.bg) || {}).c || '#ffffff')) : (look.accent || '#3b82f6');
+        if (!/^#[0-9a-f]{6}$/i.test(cur)) cur = '#ffffff';
+        RKColorPick.open({
+            title: t(kind === 'bg' ? 'lk.bg' : 'lk.acc') + ': ' + t('lk.custom'),
+            value: cur,
+            onInput: function (hex) {
+                if (kind === 'bg') look.bg = hex; else look.accent = hex;
+                clearTimeout(pickTimer); L.apply(look); mark(); pickTimer = setTimeout(commit, 150);
+            },
+            onDone: function () { clearTimeout(pickTimer); commit(); },
+            onCancel: function () {
+                clearTimeout(pickTimer);
+                if (before.bg) look.bg = before.bg; else delete look.bg;
+                if (before.accent) look.accent = before.accent; else delete look.accent;
+                commit();
+            }
+        });
+    }
+    bgPick.addEventListener('click', function () { pickCustom('bg'); });
+    accPick.addEventListener('click', function () { pickCustom('acc'); });
 
     /* выбор темы кнопкой сбрасывает фон: у каждой темы свой фон, а акцент остаётся */
     Array.prototype.forEach.call(document.querySelectorAll('[data-set-theme]'), function (b) {

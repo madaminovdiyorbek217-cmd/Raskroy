@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=28">
-    <link rel="stylesheet" href="./css/style.css?v=28">
+    <link rel="stylesheet" href="./css/reset.css?v=29">
+    <link rel="stylesheet" href="./css/style.css?v=29">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=28"></script>
+    <script src="./js/theme-init.js?v=29"></script>
 </head>
 
 <body class="rk-page">
@@ -355,12 +355,12 @@
                 <div class="lk-grid" id="lk-bg-l" role="radiogroup" aria-label="Светлые фоны" data-i18n-attr="aria-label:lk.light"></div>
                 <p class="lk-sub" data-i18n="lk.dark">Тёмные</p>
                 <div class="lk-grid" id="lk-bg-d" role="radiogroup" aria-label="Тёмные фоны" data-i18n-attr="aria-label:lk.dark"></div>
-                <label class="lk-pick"><input type="color" id="lk-bg-pick" value="#e6ebf3"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-bg-hex"></output></label>
+                <button type="button" class="lk-pick" id="lk-bg-pick" aria-haspopup="dialog"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-bg-hex"></output><i class="lk-pick-go" aria-hidden="true"></i></button>
             </div>
             <div class="lk-sec">
                 <h3 data-i18n="lk.acc">Цвет акцента</h3>
                 <div class="lk-grid lk-grid--acc" id="lk-acc" role="radiogroup" aria-label="Цвет акцента" data-i18n-attr="aria-label:lk.acc"></div>
-                <label class="lk-pick"><input type="color" id="lk-acc-pick" value="#3b82f6"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-acc-hex"></output></label>
+                <button type="button" class="lk-pick" id="lk-acc-pick" aria-haspopup="dialog"><span class="lk-pick-sw" aria-hidden="true"></span><span data-i18n="lk.custom">Свой цвет</span><output id="lk-acc-hex"></output><i class="lk-pick-go" aria-hidden="true"></i></button>
             </div>
             <button type="button" class="rk-btn rk-btn--ghost lk-reset" id="lk-reset" data-i18n="lk.reset">Сбросить оформление</button>
         </div>
@@ -375,21 +375,22 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=28" defer></script>
-    <script src="./js/fabric-i18n.js?v=28" defer></script>
-    <script src="./js/look-i18n.js?v=28" defer></script>
-    <script src="./js/export-i18n.js?v=28" defer></script>
-    <script src="./js/dialog.js?v=28" defer></script>
-    <script src="./js/fold.js?v=28" defer></script>
-    <script src="./js/i18n.js?v=28" defer></script>
-    <script src="./js/export.js?v=28" defer></script>
-    <script src="./js/select.js?v=28" defer></script>
-    <script src="./js/raskroy-core.js?v=28" defer></script>
-    <script src="./js/raskroy.js?v=28" defer></script>
-    <script src="./js/fabric-core.js?v=28" defer></script>
-    <script src="./js/fabric.js?v=28" defer></script>
-    <script src="./js/look.js?v=28" defer></script>
-    <script src="./js/app.js?v=28" defer></script>
+    <script src="./js/ui.js?v=29" defer></script>
+    <script src="./js/fabric-i18n.js?v=29" defer></script>
+    <script src="./js/look-i18n.js?v=29" defer></script>
+    <script src="./js/export-i18n.js?v=29" defer></script>
+    <script src="./js/dialog.js?v=29" defer></script>
+    <script src="./js/colorpick.js?v=29" defer></script>
+    <script src="./js/fold.js?v=29" defer></script>
+    <script src="./js/i18n.js?v=29" defer></script>
+    <script src="./js/export.js?v=29" defer></script>
+    <script src="./js/select.js?v=29" defer></script>
+    <script src="./js/raskroy-core.js?v=29" defer></script>
+    <script src="./js/raskroy.js?v=29" defer></script>
+    <script src="./js/fabric-core.js?v=29" defer></script>
+    <script src="./js/fabric.js?v=29" defer></script>
+    <script src="./js/look.js?v=29" defer></script>
+    <script src="./js/app.js?v=29" defer></script>
 </body>
 
 </html>

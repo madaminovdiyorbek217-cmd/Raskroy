@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '28';
+    var VERSION = '29';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 

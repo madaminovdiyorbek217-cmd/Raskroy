@@ -20,3 +20,13 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { X[l] = X[l] || {}; for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+(function () {
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'cp.hex': 'Код цвета', 'cp.palette': 'Палитра', 'cp.recent': 'Недавние', 'cp.done': 'Готово' },
+        en: { 'cp.hex': 'Colour code', 'cp.palette': 'Palette', 'cp.recent': 'Recent', 'cp.done': 'Done' },
+        uz: { 'cp.hex': 'Rang kodi', 'cp.palette': 'Palitra', 'cp.recent': 'Oxirgilar', 'cp.done': 'Tayyor' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
