@@ -81,3 +81,24 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'fold.open': 'Развернуть раздел', 'fold.close': 'Свернуть раздел' },
+        en: { 'fold.open': 'Expand section', 'fold.close': 'Collapse section' },
+        uz: { 'fold.open': 'Bo‘limni ochish', 'fold.close': 'Bo‘limni yig‘ish' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'f.all': 'Свернуть все', 'f.unall': 'Развернуть все', 'f.hint': 'Нажмите на номер детали, чтобы свернуть или развернуть её.', 'f.count': 'Деталей: {n}', 'f.pcs': 'шт', 'f.fold': 'Свернуть деталь {n}', 'f.unfold': 'Развернуть деталь {n}' },
+        en: { 'f.all': 'Collapse all', 'f.unall': 'Expand all', 'f.hint': 'Tap a part number to collapse or expand it.', 'f.count': 'Parts: {n}', 'f.pcs': 'pcs', 'f.fold': 'Collapse part {n}', 'f.unfold': 'Expand part {n}' },
+        uz: { 'f.all': 'Hammasini yig‘ish', 'f.unall': 'Hammasini ochish', 'f.hint': 'Detalni yig‘ish yoki ochish uchun uning raqamini bosing.', 'f.count': 'Detallar: {n}', 'f.pcs': 'dona', 'f.fold': '{n}-detalni yig‘ish', 'f.unfold': '{n}-detalni ochish' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+

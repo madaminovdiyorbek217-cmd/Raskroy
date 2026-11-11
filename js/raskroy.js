@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '26';
+    var VERSION = '28';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -88,11 +88,13 @@
         });
         s.materials.forEach(function (m) { var n = parseInt(String(m.id).replace(/\D/g, ''), 10); if (n >= uid) uid = n + 1; });
         s.parts = s.parts.map(function (p) {
-            return {
+            var q = {
                 name: String(p.name || ''), mat: String(p.mat || s.materials[0].id),
                 l: num(p.l), w: num(p.w), qty: Math.max(0, Math.floor(num(p.qty))),
                 rotate: !!p.rotate, e: [0, 1, 2, 3].map(function (i) { return p.e && p.e[i] ? 1 : 0; })
             };
+            if (p.fold) q.fold = 1;   /* деталь свёрнута в списке */
+            return q;
         });
         return s;
     }
@@ -334,6 +336,7 @@
 
     function focusCell(row, col) {
         var r = partsBox.children[row];
+        if (r && r.classList.contains('is-folded')) { var pi = state.parts[row]; setRowFold(r, pi, row, false, true); }
         var c = r && $('[data-col="' + col + '"]', r);
         if (c) { c.focus(); return true; }
         return false;
@@ -395,7 +398,10 @@
         var row = el('div', 'rk-row');
         row.style.setProperty('--h', hue(i));
 
-        var chip = el('span', 'rk-chip'); chip.textContent = i + 1; chip.setAttribute('aria-hidden', 'true');
+        var foldable = state.parts.length > FOLD_MIN;
+        var chip = el(foldable ? 'button' : 'span', 'rk-chip' + (foldable ? ' rk-chip--btn' : '')); chip.textContent = i + 1;
+        if (foldable) { chip.type = 'button'; chip.addEventListener('click', function () { setRowFold(row, p, i, !row.classList.contains('is-folded')); }); }
+        else chip.setAttribute('aria-hidden', 'true');
         row.appendChild(chip);
 
         function field(cls, label, input) {
@@ -485,13 +491,58 @@
         tools.appendChild(del);
         row.appendChild(tools);
 
+        if (foldable && p.fold) setRowFold(row, p, i, true, true);
+        else if (foldable) foldLabel(row, i, false);
         return row;
     }
+
+    /* ---------- Сворачивание деталей (когда их больше 10) ---------- */
+    var FOLD_MIN = 10;
+    function foldLabel(row, i, on) {
+        var chip = row.firstChild;
+        if (!chip || chip.tagName !== 'BUTTON') return;
+        var txt = t(on ? 'f.unfold' : 'f.fold', { n: i + 1 });
+        chip.setAttribute('aria-label', txt); chip.title = txt;
+        chip.setAttribute('aria-expanded', on ? 'false' : 'true');
+    }
+    function sumNode(row, p, i) {
+        var b = el('button', 'rk-sum', { type: 'button', 'aria-label': t('f.unfold', { n: i + 1 }), 'aria-expanded': 'false' });
+        var m = matById(p.mat);
+        var bad = !p.l || !p.w || !p.qty;
+        if (bad) b.classList.add('is-bad');
+        var n = el('span', 'rk-sum-n'); n.textContent = p.name || t('p.name');
+        var d = el('span', 'rk-sum-d'); d.textContent = (p.l ? mmf(p.l) : '?') + ' × ' + (p.w ? mmf(p.w) : '?') + ' · ' + (p.qty || 0) + ' ' + t('f.pcs');
+        var mt = el('span', 'rk-sum-m'); mt.textContent = m ? m.name : '';
+        b.appendChild(n); b.appendChild(d); b.appendChild(mt); b.appendChild(el('i', 'rk-sum-chev'));
+        b.addEventListener('click', function () { setRowFold(row, p, i, false); });
+        return b;
+    }
+    function setRowFold(row, p, i, on, quiet) {
+        var old = row.querySelector(':scope > .rk-sum'); if (old) old.remove();
+        row.classList.toggle('is-folded', on);
+        if (on) { p.fold = 1; row.appendChild(sumNode(row, p, i)); }
+        else delete p.fold;
+        foldLabel(row, i, on);
+        if (!quiet) changed();
+        if (!on && !quiet) { var c = row.querySelector('[data-col="name"]'); if (c && !row.classList.contains('is-folded') && document.activeElement === document.body) { try { c.focus({ preventScroll: true }); } catch (e) { /* не страшно */ } } }
+    }
+    function updateFoldBar() {
+        var bar = $('#rk-foldbar'), n = state.parts.length;
+        bar.hidden = n <= FOLD_MIN;
+        if (n > FOLD_MIN) $('#rk-foldbar-n').textContent = t('f.count', { n: n });
+    }
+    function foldAll(on) {
+        state.parts.forEach(function (p) { if (on) p.fold = 1; else delete p.fold; });
+        renderParts(); changed();
+    }
+    $('#rk-fold-all').addEventListener('click', function () { foldAll(true); });
+    $('#rk-unfold-all').addEventListener('click', function () { foldAll(false); });
 
     function renderParts() {
         partsBox.innerHTML = '';
         state.parts.forEach(function (p, i) { partsBox.appendChild(partRow(p, i)); });
         $('#rk-parts-wrap').hidden = state.parts.length === 0;
+        updateFoldBar();
     }
 
     function addPart(focus) {

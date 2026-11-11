@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=26">
-    <link rel="stylesheet" href="./css/style.css?v=26">
+    <link rel="stylesheet" href="./css/reset.css?v=28">
+    <link rel="stylesheet" href="./css/style.css?v=28">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=26"></script>
+    <script src="./js/theme-init.js?v=28"></script>
 </head>
 
 <body class="rk-page">
@@ -163,6 +163,13 @@
                         <button type="button" class="rk-btn" id="rk-paste-go" data-i18n="paste.go">Добавить в список</button>
                     </div>
                     <p class="rk-hint" id="rk-paste-note" role="status"></p>
+                </div>
+
+                <div class="rk-foldbar" id="rk-foldbar" hidden>
+                    <span class="rk-foldbar-n" id="rk-foldbar-n"></span>
+                    <button type="button" class="rk-btn rk-btn--ghost rk-btn--sm" id="rk-fold-all" data-i18n="f.all">Свернуть все</button>
+                    <button type="button" class="rk-btn rk-btn--ghost rk-btn--sm" id="rk-unfold-all" data-i18n="f.unall">Развернуть все</button>
+                    <p class="rk-hint" data-i18n="f.hint">Нажмите на номер детали, чтобы свернуть или развернуть её.</p>
                 </div>
 
                 <div class="rk-parts" id="rk-parts-wrap">
@@ -368,20 +375,21 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=26" defer></script>
-    <script src="./js/fabric-i18n.js?v=26" defer></script>
-    <script src="./js/look-i18n.js?v=26" defer></script>
-    <script src="./js/export-i18n.js?v=26" defer></script>
-    <script src="./js/dialog.js?v=26" defer></script>
-    <script src="./js/i18n.js?v=26" defer></script>
-    <script src="./js/export.js?v=26" defer></script>
-    <script src="./js/select.js?v=26" defer></script>
-    <script src="./js/raskroy-core.js?v=26" defer></script>
-    <script src="./js/raskroy.js?v=26" defer></script>
-    <script src="./js/fabric-core.js?v=26" defer></script>
-    <script src="./js/fabric.js?v=26" defer></script>
-    <script src="./js/look.js?v=26" defer></script>
-    <script src="./js/app.js?v=26" defer></script>
+    <script src="./js/ui.js?v=28" defer></script>
+    <script src="./js/fabric-i18n.js?v=28" defer></script>
+    <script src="./js/look-i18n.js?v=28" defer></script>
+    <script src="./js/export-i18n.js?v=28" defer></script>
+    <script src="./js/dialog.js?v=28" defer></script>
+    <script src="./js/fold.js?v=28" defer></script>
+    <script src="./js/i18n.js?v=28" defer></script>
+    <script src="./js/export.js?v=28" defer></script>
+    <script src="./js/select.js?v=28" defer></script>
+    <script src="./js/raskroy-core.js?v=28" defer></script>
+    <script src="./js/raskroy.js?v=28" defer></script>
+    <script src="./js/fabric-core.js?v=28" defer></script>
+    <script src="./js/fabric.js?v=28" defer></script>
+    <script src="./js/look.js?v=28" defer></script>
+    <script src="./js/app.js?v=28" defer></script>
 </body>
 
 </html>

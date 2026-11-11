@@ -884,3 +884,46 @@ html.rkx-lock, html.rkx-lock body { overflow: hidden; }
 .rkd-btns .rk-btn { min-height: 48px; padding: 0 12px; justify-content: center; }
 .rk-btn.rkd-danger { height: 46px; border-color: color-mix(in srgb, #ff7a3d 70%, transparent); background: color-mix(in srgb, #ff7a3d 18%, transparent); color: #ff7a3d; font-weight: 700; }
 :root[data-theme="light"] .rk-btn.rkd-danger { color: #c2410c; border-color: #c2410c; background: #fff1ea; }
+
+/* ---------- Сворачивание разделов (js/fold.js) ---------- */
+.rk-foldable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.rk-foldable .rk-wtools, .rk-foldable button, .rk-foldable a { cursor: auto; }
+.rk-foldable .rk-fold-btn { cursor: pointer; }
+.rk-fold-btn { flex: none; margin-left: auto; width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--muted); }
+.rk-fold-btn:hover { color: var(--text); border-color: var(--line2); }
+.rk-fold-chev { width: 9px; height: 9px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: 225deg; translate: 0 2px; transition: rotate .2s, translate .2s; }
+.rk-step.is-folded .rk-fold-chev { rotate: 45deg; translate: 0 -2px; }
+@media screen {
+    .rk-step.is-folded > :not(.rk-step-head) { display: none !important; }
+    .rk-step.is-folded > .rk-step-head > :not(.rk-num):not(.rk-fold-btn):not(:nth-child(2)) { display: none !important; }
+    .rk-step.is-folded { padding-top: 14px; padding-bottom: 14px; }
+    .rk-step.is-folded > .rk-step-head { margin-bottom: 0; flex-wrap: nowrap; }
+}
+@media print { .rk-fold-btn { display: none !important; } }
+
+/* ---------- Сворачивание деталей (больше 10) ---------- */
+.rk-foldbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin: 0 0 12px; }
+.rk-foldbar-n { font-weight: 600; margin-right: 4px; }
+.rk-foldbar .rk-hint { flex: 1 1 100%; margin: 0; }
+button.rk-chip--btn { padding: 0; cursor: pointer; font-family: var(--mono); -webkit-tap-highlight-color: transparent; }
+button.rk-chip--btn:hover { filter: brightness(1.12); }
+.rk-row.is-folded { grid-template-columns: 36px minmax(0, 1fr); padding-top: 5px; padding-bottom: 5px; }
+.rk-row.is-folded > :not(.rk-chip):not(.rk-sum) { display: none !important; }
+.rk-row.is-folded > .rk-chip { grid-row: 1; grid-column: 1; align-self: center; margin: 0; }
+.rk-sum { grid-row: 1; grid-column: 2; display: flex; align-items: center; gap: 14px; min-width: 0; padding: 8px 6px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 8px; -webkit-tap-highlight-color: transparent; }
+.rk-sum-n { flex: 1.4 1 0; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-sum-d { flex: none; font-family: var(--mono); font-size: 14px; white-space: nowrap; }
+.rk-sum-m { flex: 1 1 0; min-width: 0; color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-sum.is-bad .rk-sum-d { color: var(--warn); }
+.rk-sum-chev { flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); rotate: 45deg; translate: 0 -2px; }
+@media (max-width: 700px) {
+    .rk-foldbar { display: grid; grid-template-columns: 1fr 1fr; }
+    .rk-foldbar-n { grid-column: 1 / -1; }
+    .rk-foldbar .rk-hint { grid-column: 1 / -1; }
+    .rk-foldbar .rk-btn { height: auto; min-height: 42px; padding: 8px 10px; white-space: normal; line-height: 1.2; }
+    .rk-row.is-folded { grid-template-columns: 34px minmax(0, 1fr); padding: 10px 14px; gap: 0 10px; }
+    .rk-sum { flex-wrap: wrap; gap: 2px 10px; padding: 2px 0; }
+    .rk-sum-n { flex: 1 1 100%; }
+    .rk-sum-m { flex: 1 1 0; }
+}
+@media print { .rk-foldbar { display: none !important; } }
