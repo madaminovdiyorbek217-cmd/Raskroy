@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=29">
-    <link rel="stylesheet" href="./css/style.css?v=29">
+    <link rel="stylesheet" href="./css/reset.css?v=31">
+    <link rel="stylesheet" href="./css/style.css?v=31">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=29"></script>
+    <script src="./js/theme-init.js?v=31"></script>
 </head>
 
 <body class="rk-page">
@@ -81,6 +81,14 @@
                         <h2 id="rk-h-mat" class="rk-h2" data-i18n="step.mat">Материалы и настройки</h2>
                     </div>
                 </header>
+
+                <div class="rk-modebar">
+                    <div class="rk-pick" role="radiogroup" aria-label="Режим подбора" data-i18n-attr="aria-label:am.aria">
+                        <button type="button" role="radio" data-am="manual" aria-checked="true" data-i18n="am.manual">Ручной подбор</button>
+                        <button type="button" role="radio" data-am="auto" aria-checked="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/></svg><span data-i18n="am.auto">Авто подбор</span></button>
+                    </div>
+                    <p class="rk-modenote" id="rk-modenote"></p>
+                </div>
 
                 <div id="rk-materials" class="rk-materials"></div>
 
@@ -220,6 +228,10 @@
                         </div>
                     </div>
                 </header>
+                <div class="rk-fbar">
+                    <button type="button" class="rk-btn rk-btn--ghost" id="rk-newfolder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></svg><span data-i18n="fo.new">Новая папка</span></button>
+                    <p class="rk-fhint" data-i18n="fo.hint">Папка — для всех раскроев одного заказчика. Соберите работы в папку и скачайте её одним файлом.</p>
+                </div>
                 <div class="rk-wlist" id="rk-works-list"></div>
             </section>
 
@@ -375,22 +387,22 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=29" defer></script>
-    <script src="./js/fabric-i18n.js?v=29" defer></script>
-    <script src="./js/look-i18n.js?v=29" defer></script>
-    <script src="./js/export-i18n.js?v=29" defer></script>
-    <script src="./js/dialog.js?v=29" defer></script>
-    <script src="./js/colorpick.js?v=29" defer></script>
-    <script src="./js/fold.js?v=29" defer></script>
-    <script src="./js/i18n.js?v=29" defer></script>
-    <script src="./js/export.js?v=29" defer></script>
-    <script src="./js/select.js?v=29" defer></script>
-    <script src="./js/raskroy-core.js?v=29" defer></script>
-    <script src="./js/raskroy.js?v=29" defer></script>
-    <script src="./js/fabric-core.js?v=29" defer></script>
-    <script src="./js/fabric.js?v=29" defer></script>
-    <script src="./js/look.js?v=29" defer></script>
-    <script src="./js/app.js?v=29" defer></script>
+    <script src="./js/ui.js?v=31" defer></script>
+    <script src="./js/fabric-i18n.js?v=31" defer></script>
+    <script src="./js/look-i18n.js?v=31" defer></script>
+    <script src="./js/export-i18n.js?v=31" defer></script>
+    <script src="./js/dialog.js?v=31" defer></script>
+    <script src="./js/colorpick.js?v=31" defer></script>
+    <script src="./js/fold.js?v=31" defer></script>
+    <script src="./js/i18n.js?v=31" defer></script>
+    <script src="./js/export.js?v=31" defer></script>
+    <script src="./js/select.js?v=31" defer></script>
+    <script src="./js/raskroy-core.js?v=31" defer></script>
+    <script src="./js/raskroy.js?v=31" defer></script>
+    <script src="./js/fabric-core.js?v=31" defer></script>
+    <script src="./js/fabric.js?v=31" defer></script>
+    <script src="./js/look.js?v=31" defer></script>
+    <script src="./js/app.js?v=31" defer></script>
 </body>
 
 </html>

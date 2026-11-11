@@ -102,3 +102,64 @@
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
 
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'am.aria': 'Режим подбора', 'am.manual': 'Ручной подбор', 'am.auto': 'Авто подбор',
+            'am.note.manual': 'Направление резов и параметры полос вы задаёте сами.',
+            'am.note.auto': 'Программа сама переберёт несколько вариантов раскроя (направление резов, порядок деталей) и оставит тот, где меньше листов и отходов.',
+            'am.d.auto': 'смешанное направление резов', 'am.d.length': 'резы вдоль длины листа', 'am.d.width': 'резы вдоль ширины листа',
+            'am.res': 'Авто подбор: проверено вариантов — {n}, выбран №{v} ({dir}).',
+            'am.res.sheets': 'Это на {n} {pl} меньше, чем у худшего варианта.', 'am.res.waste': 'Отходов меньше на {d}% листа, чем у худшего варианта.', 'am.res.same': 'Все варианты дали близкий результат.' },
+        en: { 'am.aria': 'Selection mode', 'am.manual': 'Manual', 'am.auto': 'Auto',
+            'am.note.manual': 'You set the cut direction and strip parameters yourself.',
+            'am.note.auto': 'The app tries several cutting variants (cut direction, part order) and keeps the one with fewer sheets and less waste.',
+            'am.d.auto': 'mixed cut direction', 'am.d.length': 'cuts along sheet length', 'am.d.width': 'cuts along sheet width',
+            'am.res': 'Auto: {n} variants tried, #{v} chosen ({dir}).',
+            'am.res.sheets': 'That is {n} {pl} fewer than the worst variant.', 'am.res.waste': 'Waste is {d}% of the sheets lower than the worst variant.', 'am.res.same': 'All variants gave a similar result.' },
+        uz: { 'am.aria': 'Tanlash rejimi', 'am.manual': 'Qo‘lda tanlash', 'am.auto': 'Avto tanlash',
+            'am.note.manual': 'Kesish yo‘nalishi va polosa parametrlarini o‘zingiz belgilaysiz.',
+            'am.note.auto': 'Dastur bir nechta variantni (kesish yo‘nalishi, detallar tartibi) sinab ko‘radi va varaqlari hamda chiqindisi kam bo‘lganini qoldiradi.',
+            'am.d.auto': 'aralash kesish yo‘nalishi', 'am.d.length': 'varaq uzunligi bo‘ylab kesish', 'am.d.width': 'varaq eni bo‘ylab kesish',
+            'am.res': 'Avto: {n} ta variant sinaldi, №{v} tanlandi ({dir}).',
+            'am.res.sheets': 'Bu eng yomon variantdan {n} {pl} kam.', 'am.res.waste': 'Chiqindi eng yomon variantdan varaqning {d}% ga kam.', 'am.res.same': 'Barcha variantlar o‘xshash natija berdi.' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'fo.new': 'Новая папка', 'fo.hint': 'Папка — для всех раскроев одного заказчика. Соберите работы в папку и скачайте её одним файлом.',
+            'fo.name': 'Название папки (например, имя заказчика)', 'fo.ph': 'Заказчик', 'fo.default': 'Папка {n}', 'fo.create': 'Создать',
+            'fo.created': 'Папка «{name}» создана', 'fo.addwork': '+ Работа', 'fo.rename': 'Переименовать', 'fo.del': 'Удалить папку',
+            'fo.delconfirm': 'Удалить папку «{name}»? Работы из неё не удаляются, они останутся без папки.',
+            'fo.count': '{n} {pl}', 'fo.work.pl': 'работа|работы|работ', 'fo.emptyshort': 'пусто',
+            'fo.empty': 'Папка пуста. Нажмите «+ Работа» или перенесите сюда готовую работу кнопкой «В папку».',
+            'fo.dl': 'Скачать папку', 'fo.toggle': 'Папка «{name}»: свернуть или развернуть',
+            'fo.move': 'В папку', 'fo.move.title': 'В какую папку переместить «{name}»?', 'fo.none': 'Без папки', 'fo.newopt': '+ Новая папка…',
+            'fo.moved': '«{w}» теперь в папке «{f}»', 'fo.unmoved': '«{w}» вынесена из папки', 'fo.ungrouped': 'Без папки' },
+        en: { 'fo.new': 'New folder', 'fo.hint': 'A folder holds all the cuts for one customer. Put the projects in a folder and download it as one file.',
+            'fo.name': 'Folder name (e.g. the customer’s name)', 'fo.ph': 'Customer', 'fo.default': 'Folder {n}', 'fo.create': 'Create',
+            'fo.created': 'Folder “{name}” created', 'fo.addwork': '+ Project', 'fo.rename': 'Rename', 'fo.del': 'Delete folder',
+            'fo.delconfirm': 'Delete folder “{name}”? Its projects are not deleted, they just move out of the folder.',
+            'fo.count': '{n} {pl}', 'fo.work.pl': 'project|projects', 'fo.emptyshort': 'empty',
+            'fo.empty': 'The folder is empty. Press “+ Project” or move a finished project here with “To folder”.',
+            'fo.dl': 'Download folder', 'fo.toggle': 'Folder “{name}”: collapse or expand',
+            'fo.move': 'To folder', 'fo.move.title': 'Move “{name}” to which folder?', 'fo.none': 'No folder', 'fo.newopt': '+ New folder…',
+            'fo.moved': '“{w}” is now in “{f}”', 'fo.unmoved': '“{w}” was taken out of its folder', 'fo.ungrouped': 'No folder' },
+        uz: { 'fo.new': 'Yangi papka', 'fo.hint': 'Papka — bir buyurtmachining barcha bichimlari uchun. Ishlarni papkaga yig‘ib, uni bitta fayl qilib yuklab oling.',
+            'fo.name': 'Papka nomi (masalan, buyurtmachi ismi)', 'fo.ph': 'Buyurtmachi', 'fo.default': 'Papka {n}', 'fo.create': 'Yaratish',
+            'fo.created': '«{name}» papkasi yaratildi', 'fo.addwork': '+ Ish', 'fo.rename': 'Nomini o‘zgartirish', 'fo.del': 'Papkani o‘chirish',
+            'fo.delconfirm': '«{name}» papkasi o‘chirilsinmi? Ishlar o‘chmaydi, papkasiz qoladi.',
+            'fo.count': '{n} {pl}', 'fo.work.pl': 'ish', 'fo.emptyshort': 'bo‘sh',
+            'fo.empty': 'Papka bo‘sh. «+ Ish» tugmasini bosing yoki tayyor ishni «Papkaga» tugmasi bilan ko‘chiring.',
+            'fo.dl': 'Papkani yuklab olish', 'fo.toggle': '«{name}» papkasi: yig‘ish yoki ochish',
+            'fo.move': 'Papkaga', 'fo.move.title': '«{name}» qaysi papkaga ko‘chirilsin?', 'fo.none': 'Papkasiz', 'fo.newopt': '+ Yangi papka…',
+            'fo.moved': '«{w}» endi «{f}» papkasida', 'fo.unmoved': '«{w}» papkadan chiqarildi', 'fo.ungrouped': 'Papkasiz' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

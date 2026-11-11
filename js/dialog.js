@@ -42,10 +42,71 @@
             try { (opts.danger ? q('.rkd-no') : yes).focus({ preventScroll: true }); } catch (e) { /* не страшно */ }
         });
     }
+
+    /* Окно с одной строкой ввода: RKDialog.prompt(текст, {value, ok, placeholder, max}) -> Promise<строка | null> */
+    function promptDialog(msg, opts) {
+        opts = opts || {};
+        if (cur) close(null);
+        return new Promise(function (done) {
+            var wrap = document.createElement('div');
+            wrap.className = 'rkx-wrap'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+            wrap.innerHTML = '<div class="rkx-card rkd-card"><div class="rkd-msg"></div><input class="rk-input rkd-in" type="text" autocomplete="off" spellcheck="false"><div class="rkd-btns"><button type="button" class="rk-btn rk-btn--ghost rkd-no"></button><button type="button" class="rk-btn rk-btn--main rkd-yes"></button></div></div>';
+            var q = function (s) { return wrap.querySelector(s); };
+            var inp = q('.rkd-in');
+            q('.rkd-msg').textContent = msg;
+            q('.rkd-no').textContent = opts.cancel || tr('d.cancel', 'Отмена');
+            q('.rkd-yes').textContent = opts.ok || tr('d.ok', 'ОК');
+            inp.value = opts.value || ''; inp.maxLength = opts.max || 60;
+            if (opts.placeholder) inp.placeholder = opts.placeholder;
+            function ok() { var v = inp.value.trim(); if (!v) { inp.focus(); return; } close(v); }
+            q('.rkd-no').addEventListener('click', function () { close(null); });
+            q('.rkd-yes').addEventListener('click', ok);
+            wrap.addEventListener('click', function (e) { if (e.target === wrap) close(null); });
+            function key(e) {
+                if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(null); }
+                else if (e.key === 'Enter' && document.activeElement === inp) { e.preventDefault(); e.stopPropagation(); ok(); }
+            }
+            document.addEventListener('keydown', key, true);
+            cur = { wrap: wrap, done: done, key: key, prev: document.activeElement };
+            document.body.appendChild(wrap);
+            document.documentElement.classList.add('rkx-lock');
+            try { inp.focus({ preventScroll: true }); inp.select(); } catch (e) { /* не страшно */ }
+        });
+    }
+    /* Выбор из списка: RKDialog.pick(текст, [{v, label}], {current}) -> Promise<v | null> (v — строка, в том числе пустая) */
+    function pickDialog(msg, items, opts) {
+        opts = opts || {};
+        if (cur) close(null);
+        return new Promise(function (done) {
+            var wrap = document.createElement('div');
+            wrap.className = 'rkx-wrap'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+            wrap.innerHTML = '<div class="rkx-card rkd-card"><div class="rkd-msg"></div><div class="rkd-opts"></div><div class="rkd-btns"><button type="button" class="rk-btn rk-btn--ghost rkd-no"></button></div></div>';
+            var q = function (s) { return wrap.querySelector(s); };
+            q('.rkd-msg').textContent = msg;
+            q('.rkd-no').textContent = opts.cancel || tr('d.cancel', 'Отмена');
+            var box = q('.rkd-opts'), first = null;
+            items.forEach(function (it) {
+                var b = document.createElement('button');
+                b.type = 'button'; b.className = 'rkd-opt' + (it.v === opts.current ? ' is-cur' : '') + (it.add ? ' is-add' : '');
+                b.textContent = it.label;
+                b.addEventListener('click', function () { close(it.v); });
+                box.appendChild(b);
+                if (!first || it.v === opts.current) first = b;
+            });
+            q('.rkd-no').addEventListener('click', function () { close(null); });
+            wrap.addEventListener('click', function (e) { if (e.target === wrap) close(null); });
+            function key(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(null); } }
+            document.addEventListener('keydown', key, true);
+            cur = { wrap: wrap, done: done, key: key, prev: document.activeElement };
+            document.body.appendChild(wrap);
+            document.documentElement.classList.add('rkx-lock');
+            try { (first || q('.rkd-no')).focus({ preventScroll: true }); } catch (e) { /* не страшно */ }
+        });
+    }
     /* если условие не выполнено, действие идёт сразу; иначе после «ОК» */
     function ask(cond, msg, opts, go) {
         if (!cond) { go(); return; }
         confirmDialog(msg, opts).then(function (ok) { if (ok) go(); });
     }
-    window.RKDialog = { confirm: confirmDialog, ask: ask };
+    window.RKDialog = { confirm: confirmDialog, ask: ask, prompt: promptDialog, pick: pickDialog };
 })();

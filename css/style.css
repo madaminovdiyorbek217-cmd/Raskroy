@@ -961,3 +961,55 @@ button.rk-chip--btn:hover { filter: brightness(1.12); }
 button.lk-pick { width: 100%; background: transparent; color: inherit; text-align: left; cursor: pointer; }
 .lk-pick-go { flex: none; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); rotate: -45deg; margin-left: 4px; }
 .lk-pick output:empty + .lk-pick-go { margin-left: auto; }
+
+/* ---- Ручной / авто подбор ---- */
+.rk-modebar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 16px; }
+.rk-pick { display: inline-flex; flex: none; gap: 2px; padding: 3px; border: 1px solid var(--line2); border-radius: 999px; background: var(--panel); }
+.rk-pick button { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 600 14px var(--font); cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+.rk-pick button svg { width: 17px; height: 17px; fill: currentColor; stroke: none; }
+.rk-pick button:not([aria-checked="true"]):hover { color: var(--text); }
+.rk-pick button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); }
+.rk-pick button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rk-modenote { flex: 1 1 240px; min-width: 0; margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.rk-f[hidden] { display: none !important; }
+.rk-auto-note { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 12px; padding: 9px 12px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: var(--r); background: color-mix(in srgb, var(--accent) 7%, var(--panel2)); font-size: 14px; line-height: 1.45; }
+.rk-auto-note svg { flex: none; width: 16px; height: 16px; margin-top: 2px; fill: var(--accent); }
+@media (max-width: 480px) {
+    .rk-pick { display: flex; width: 100%; }
+    .rk-pick button { flex: 1 1 0; justify-content: center; padding: 0 8px; }
+}
+
+/* ---- Папки в «Мои работы» ---- */
+.rk-fbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 14px; }
+.rk-fbar .rk-btn { gap: 8px; }
+.rk-fbar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rk-fhint { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.rk-folder { margin: 0 0 14px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: var(--r); background: color-mix(in srgb, var(--accent) 5%, var(--panel2)); overflow: hidden; }
+.rk-folder-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 10px 12px; }
+.rk-folder-tg { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; padding: 4px 6px; border: 0; border-radius: 10px; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.rk-folder-tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rk-folder-chev { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s; }
+.rk-folder.is-open .rk-folder-chev { transform: rotate(90deg); }
+.rk-folder-ico { flex: none; width: 26px; height: 26px; fill: color-mix(in srgb, var(--accent) 22%, transparent); stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; }
+.rk-folder-tx { display: flex; flex-direction: column; min-width: 0; }
+.rk-folder-tx b { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
+.rk-folder-tx small { font-size: 13px; color: var(--muted); }
+.rk-folder-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.rk-folder-acts .rk-btn { min-height: 40px; }
+.rk-folder-body { display: none; padding: 0 12px 12px; }
+.rk-folder.is-open .rk-folder-body { display: flex; flex-direction: column; gap: 10px; }
+.rk-folder-body .rk-work { background: var(--panel); }
+.rk-folder-empty { margin: 4px 4px 2px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.rk-wloose { margin: 18px 0 10px; font-size: 15px; font-weight: 700; color: var(--muted); }
+.rkd-in { width: 100%; }
+.rkd-opts { display: flex; flex-direction: column; gap: 8px; max-height: min(52vh, 360px); overflow-y: auto; }
+.rkd-opt { min-height: 46px; padding: 0 14px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--panel2); color: var(--text); font: 600 15px var(--font); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.rkd-opt:hover { border-color: var(--accent); }
+.rkd-opt.is-cur { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel2)); }
+.rkd-opt.is-add { color: var(--accent); border-style: dashed; }
+.rkd-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rkd-card .rkd-btns:has(.rkd-no:only-child) { grid-template-columns: 1fr; }
+@media (max-width: 560px) {
+    .rk-folder-acts { width: 100%; }
+    .rk-folder-acts .rk-btn { flex: 1 1 auto; }
+}

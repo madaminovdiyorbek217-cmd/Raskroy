@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '29';
+    var VERSION = '31';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -34,7 +34,7 @@
     var ROUNDS = ['whole', 'half', 'none'];
     var BASES = ['cut', 'perim', 'part', 'mat'];
     function defaultSettings() {
-        return { kerf: 4, trim: 10, minOffcut: 300, minOffcut2: 300, minTrim: 5, dir: 'auto', texture: true, complex: true, minStrip: 0, maxStrip: 0, maxStripLen: 0, currency: t('cur') };
+        return { kerf: 4, trim: 10, minOffcut: 300, minOffcut2: 300, minTrim: 5, mode: 'manual', dir: 'auto', texture: true, complex: true, minStrip: 0, maxStrip: 0, maxStripLen: 0, currency: t('cur') };
     }
 
     function exampleState() {
@@ -77,6 +77,7 @@
         s.settings = Object.assign(defaultSettings(), s.settings || {});
         if (!had2) s.settings.minOffcut2 = s.settings.minOffcut;
         if (['auto', 'length', 'width'].indexOf(s.settings.dir) < 0) s.settings.dir = 'auto';
+        s.settings.mode = s.settings.mode === 'auto' ? 'auto' : 'manual';
         s.settings.texture = s.settings.texture !== false;
         s.settings.complex = s.settings.complex !== false;
         s.materials = s.materials.map(function (m) {
@@ -105,21 +106,26 @@
             var raw = localStorage.getItem(PROJ_KEY);
             var o = raw && JSON.parse(raw);
             if (o && Array.isArray(o.list)) {
-                var list = [];
+                var list = [], folders = [], fids = {};
+                if (Array.isArray(o.folders)) o.folders.forEach(function (fo) {
+                    if (!fo || !fo.id || fids[String(fo.id)]) return;
+                    fids[String(fo.id)] = 1;
+                    folders.push({ id: String(fo.id), name: String(fo.name || '').slice(0, 60), open: fo.open !== false });
+                });
                 o.list.forEach(function (it, i) {
                     var st = normalizeState(it && it.state);
-                    if (st) list.push({ id: String(it.id || ('p' + (i + 1))), n: Math.max(1, Math.floor(Number(it.n) || (i + 1))), name: String(it.name || '').slice(0, 60), u: Number(it.u) || 0, state: st });
+                    if (st) list.push({ id: String(it.id || ('p' + (i + 1))), n: Math.max(1, Math.floor(Number(it.n) || (i + 1))), name: String(it.name || '').slice(0, 60), u: Number(it.u) || 0, f: fids[String(it.f)] ? String(it.f) : '', state: st });
                 });
-                if (list.length) out = { active: String(o.active || ''), list: list };
+                if (list.length) out = { active: String(o.active || ''), list: list, folders: folders };
             }
             if (!out) {
                 /* первая загрузка после обновления: прежняя единственная работа становится первой вкладкой */
                 var old = localStorage.getItem(STORE_KEY);
                 var st2 = old && normalizeState(JSON.parse(old));
-                if (st2) out = { active: 'p1', list: [{ id: 'p1', n: 1, name: '', state: st2 }] };
+                if (st2) out = { active: 'p1', folders: [], list: [{ id: 'p1', n: 1, name: '', f: '', state: st2 }] };
             }
         } catch (e) { out = null; }
-        if (!out) out = { active: 'p1', list: [{ id: 'p1', n: 1, name: '', state: exampleState() }] };
+        if (!out) out = { active: 'p1', folders: [], list: [{ id: 'p1', n: 1, name: '', f: '', state: exampleState() }] };
         if (!out.list.some(function (it) { return it.id === out.active; })) out.active = out.list[0].id;
         return out;
     }
@@ -309,6 +315,7 @@
         });
         S.currency.value = state.settings.currency;
         S.dir.value = state.settings.dir;
+        applyMode();
         S.texture.checked = state.settings.texture !== false;
         S.complex.checked = state.settings.complex !== false;
     }
@@ -317,6 +324,24 @@
             var v = parseFloat(String(S[k].value).replace(',', '.'));
             state.settings[k] = isFinite(v) && v >= 0 ? v : 0;
             changed();
+        });
+    });
+    /* Ручной подбор / Авто подбор */
+    var amBtns = $$('[data-am]');
+    function applyMode() {
+        var auto = state.settings.mode === 'auto';
+        amBtns.forEach(function (b) { b.setAttribute('aria-checked', String(b.getAttribute('data-am') === (auto ? 'auto' : 'manual'))); });
+        var note = $('#rk-modenote');
+        if (note) note.textContent = t(auto ? 'am.note.auto' : 'am.note.manual');
+        var lab = S.dir.closest ? S.dir.closest('label') : null;
+        if (lab) lab.hidden = auto;
+        if (window.RKSelect && RKSelect.refresh) { try { RKSelect.refresh(); } catch (e) { /* не страшно */ } }
+    }
+    amBtns.forEach(function (b) {
+        b.addEventListener('click', function () {
+            var m = b.getAttribute('data-am') === 'auto' ? 'auto' : 'manual';
+            if (state.settings.mode === m) return;
+            state.settings.mode = m; applyMode(); changed(true);
         });
     });
     S.dir.addEventListener('change', function () { state.settings.dir = S.dir.value; changed(); });
@@ -601,22 +626,36 @@
     });
 
     /* ---------- Расчёт ---------- */
-    var worker = null, workerFailed = false, reqId = 0, callbacks = {};
-    function getWorker() {
-        if (worker || workerFailed || typeof Worker === 'undefined') return worker;
+    var pool = [], workerFailed = false, reqId = 0, callbacks = {};
+    var MAXW = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1));
+    function spawn() {
+        if (workerFailed || typeof Worker === 'undefined') return null;
         try {
-            worker = new Worker('./js/raskroy-worker.js?v=' + VERSION);
-            worker.onmessage = function (e) {
+            var w = new Worker('./js/raskroy-worker.js?v=' + VERSION);
+            w.busy = 0;
+            w.onmessage = function (e) {
                 var cb = callbacks[e.data.id]; delete callbacks[e.data.id];
+                w.busy = Math.max(0, w.busy - 1);
                 if (cb) cb(e.data.error ? null : e.data.res, e.data.error);
             };
-            worker.onerror = function () {
-                workerFailed = true; worker = null;
+            w.onerror = function () {
+                workerFailed = true;
+                pool.forEach(function (x) { try { x.terminate(); } catch (er) { /* не страшно */ } });
+                pool = [];
                 var pend = callbacks; callbacks = {};
                 Object.keys(pend).forEach(function (k) { pend[k](null, 'worker'); });
             };
-        } catch (err) { workerFailed = true; worker = null; }
-        return worker;
+            pool.push(w);
+            return w;
+        } catch (err) { workerFailed = true; return null; }
+    }
+    function getWorker() {
+        if (workerFailed) return null;
+        var free = null;
+        pool.forEach(function (w) { if (!free || w.busy < free.busy) free = w; });
+        if (free && free.busy === 0) return free;
+        if (pool.length < MAXW) { var n = spawn(); if (n) return n; }
+        return free || spawn();
     }
     function solve(cfg, cb) {
         var w = getWorker();
@@ -624,10 +663,51 @@
             var id = ++reqId; callbacks[id] = function (res, err) {
                 if (res) cb(res); else cb(syncSolve(cfg));
             };
+            w.busy++;
             w.postMessage({ id: id, cfg: cfg });
         } else cb(syncSolve(cfg));
     }
     function syncSolve(cfg) { return window.Raskroy.optimize(cfg); }
+
+
+    /* ---------- Авто подбор: несколько вариантов, остаётся лучший ---------- */
+    var AUTO_VARIANTS = [
+        { dir: 'auto', seed: 777 }, { dir: 'length', seed: 777 }, { dir: 'width', seed: 777 },
+        { dir: 'auto', seed: 2024 }, { dir: 'length', seed: 31337 }, { dir: 'width', seed: 31337 },
+        { dir: 'auto', seed: 90210 }, { dir: 'length', seed: 4242 }, { dir: 'width', seed: 4242 }
+    ];
+    function maxFreeArea(res) {
+        var m = 0;
+        res.sheets.forEach(function (sh) { sh.free.forEach(function (f) { if (f.w * f.h > m) m = f.w * f.h; }); });
+        return m;
+    }
+    /* меньше число — лучше: сначала нераспределённые, затем листы, затем крупнее деловой остаток, затем короче рез */
+    function resScore(res) {
+        return res.unplaced.length * 1e16 + res.stats.sheets * 1e13 - maxFreeArea(res) + res.stats.cuts * 0.01;
+    }
+    function solveJob(j, cb) {
+        var cfg = j.cfg;
+        if (!cfg.auto) { solve(cfg, cb); return; }
+        var n = AUTO_VARIANTS.length, got = new Array(n), left = n;
+        var per = Math.max(200, Math.round(cfg.timeMs * 0.6));
+        AUTO_VARIANTS.forEach(function (v, i) {
+            solve(Object.assign({}, cfg, { dir: v.dir, seed: v.seed, timeMs: per }), function (res) {
+                got[i] = res;
+                if (--left) return;
+                var best = 0, worst = 0;
+                got.forEach(function (r, k) {
+                    if (resScore(r) < resScore(got[best])) best = k;
+                    if (resScore(r) > resScore(got[worst])) worst = k;
+                });
+                var res = got[best];
+                res.auto = {
+                    tried: n, dir: AUTO_VARIANTS[best].dir, variant: best,
+                    worstSheets: got[worst].stats.sheets, worstUtil: got[worst].stats.util, bestSheets: res.stats.sheets, bestUtil: res.stats.util
+                };
+                cb(res);
+            });
+        });
+    }
 
     var runToken = 0, lastResult = null, lastResultSig = '', timer;
 
@@ -646,7 +726,7 @@
                 cfg: {
                     sheet: { l: m.l, w: m.w, trim: st.settings.trim },
                     kerf: st.settings.kerf, parts: parts, minOffcut: st.settings.minOffcut, minOffcut2: st.settings.minOffcut2, timeMs: timeMs, seed: 777,
-                    texture: m.grain !== false ? st.settings.texture : false, dir: st.settings.dir, complex: m.grain !== false ? st.settings.complex : true, minStrip: st.settings.minStrip,
+                    auto: st.settings.mode === 'auto', texture: m.grain !== false ? st.settings.texture : false, dir: st.settings.mode === 'auto' ? 'auto' : st.settings.dir, complex: m.grain !== false ? st.settings.complex : true, minStrip: st.settings.minStrip,
                     maxStrip: st.settings.maxStrip, maxStripLen: st.settings.maxStripLen, minTrim: st.settings.minTrim
                 }
             });
@@ -666,7 +746,7 @@
         }
         var out = [], left = list.length;
         list.forEach(function (j, idx) {
-            solve(j.cfg, function (res) {
+            solveJob(j, function (res) {
                 if (token !== runToken) return;
                 out[idx] = { mat: j.mat, res: res, cfg: j.cfg };
                 if (--left === 0) { lastResult = out; lastResultSig = sigAtRun; renderResults(out); }
@@ -787,6 +867,16 @@
 
     /* ---------- Вывод результата ---------- */
     var uniqCounter = 0;
+    function autoNote(res) {
+        var a = res.auto;
+        if (!a) return '';
+        var txt = t('am.res', { n: a.tried, dir: t('am.d.' + a.dir), v: a.variant + 1 });
+        if (a.worstSheets > a.bestSheets) txt += ' ' + t('am.res.sheets', { n: a.worstSheets - a.bestSheets, pl: plural(a.worstSheets - a.bestSheets, 'sheet.pl') });
+        else if (a.bestUtil - a.worstUtil > 0.0005) txt += ' ' + t('am.res.waste', { d: fmt((a.bestUtil - a.worstUtil) * 100, 1) });
+        else txt += ' ' + t('am.res.same');
+        return '<p class="rk-auto-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg><span>' + esc(txt) + '</span></p>';
+    }
+
     function renderResults(list) {
         updateMatCalc(list);
         var out = $('#rk-out'), sum = $('#rk-summary'), warn = $('#rk-warn');
@@ -811,7 +901,7 @@
             var sec = el('section', 'rk-mat-res');
             var um = ' ' + t('u.m');
             var meta = '<b>' + s.sheets + '</b> ' + plural(s.sheets, 'sheet.pl') + ' ' + mmf(mat.l) + '×' + mmf(mat.w) + ' · ' + t('r.meta.parts') + ' <b>' + s.pieces + '</b> · ' + t('r.meta.used') + ' <b>' + fmt(s.util * 100, 1) + '%</b> · ' + t('r.meta.cut') + ' <b>' + fmt(s.cuts / 1000, 1) + um + '</b> · ' + t('r.meta.edge') + ' <b>' + fmt(s.edge / 1000, 1) + um + '</b>' + (mc.priced ? ' · <b>' + fmt(mc.total) + ' ' + esc(cur) + '</b>' : '');
-            var html = '<h3>' + esc(mat.name || t('m.fallback')) + '</h3><p class="rk-mat-meta">' + meta + '</p>' + costHtml(mat, mc, cur) + '<div class="rk-sheets">';
+            var html = '<h3>' + esc(mat.name || t('m.fallback')) + '</h3><p class="rk-mat-meta">' + meta + '</p>' + autoNote(r.res) + costHtml(mat, mc, cur) + '<div class="rk-sheets">';
             r.res.sheets.forEach(function (sh) {
                 uniqCounter++;
                 html += '<div class="rk-sheet"><div class="rk-sheet-draw">' + sheetSvg(sh, mat, PAL_PAGE, 'rk-svg', uniqCounter) + '</div>' +
@@ -985,7 +1075,7 @@
         if (!list.length) { resCache[it.id] = { sig: sig, out: [] }; cb([]); return; }
         var out = [], left = list.length;
         list.forEach(function (j, idx) {
-            solve(j.cfg, function (res) {
+            solveJob(j, function (res) {
                 out[idx] = { mat: j.mat, res: res, cfg: j.cfg };
                 if (--left === 0) { resCache[it.id] = { sig: sig, out: out }; cb(out); }
             });
@@ -1139,44 +1229,65 @@
         }
         return files;
     }
-    function downloadAllZip(btn) {
+    /* порядок «всех работ»: сначала папки по очереди, затем работы без папки */
+    function folderById(id) {
+        for (var i = 0; i < projects.folders.length; i++) if (projects.folders[i].id === id) return projects.folders[i];
+        return null;
+    }
+    function worksIn(fid) { return projects.list.filter(function (it) { return (it.f || '') === fid; }); }
+    function orderedWorks() {
+        var out = [];
+        projects.folders.forEach(function (fo) { out = out.concat(worksIn(fo.id)); });
+        return out.concat(worksIn(''));
+    }
+    function folderLabel(fo) { return fo.name || t('fo.default', { n: projects.folders.indexOf(fo) + 1 }); }
+
+    /* list — какие работы скачать (по умолчанию все), fo — папка: тогда файл называется по папке */
+    function downloadAllZip(btn, list, fo) {
         runExport(btn, async function () {
             await RKExport.fontsReady();
             var files = [], num = 0;
-            for (var i = 0; i < projects.list.length; i++) {
-                var it = projects.list[i], out = await workResultP(it);
+            list = list || orderedWorks();
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i], out = await workResultP(it);
                 if (!out.length) continue;
                 num++;
-                files = files.concat(await workZipFiles(it, out, (num < 10 ? '0' : '') + num + '-' + slug(workLabel(it)) + '/'));
+                var dir = (num < 10 ? '0' : '') + num + '-' + slug(workLabel(it)) + '/';
+                var own = !fo && it.f ? folderById(it.f) : null;
+                if (own) dir = slug(folderLabel(own)) + '/' + dir;
+                files = files.concat(await workZipFiles(it, out, dir));
             }
             if (!files.length) return t('x.none');
-            RKExport.save('raskroy-' + dateStamp() + '.zip', RKExport.zip(files));
+            RKExport.save('raskroy-' + (fo ? slug(folderLabel(fo)) : dateStamp()) + '.zip', RKExport.zip(files));
         });
     }
-    function downloadAllXlsx(btn) {
+    function downloadAllXlsx(btn, list, fo) {
         runExport(btn, async function () {
             var items = [];
-            for (var i = 0; i < projects.list.length; i++) {
-                var it = projects.list[i], out = await workResultP(it);
+            list = list || orderedWorks();
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i], out = await workResultP(it);
                 if (out.length) items.push({ it: it, out: out });
             }
             if (!items.length) return t('x.none');
-            RKExport.save('raskroy-' + dateStamp() + '.xlsx', RKExport.xlsx(xlsxSheets(items)));
+            RKExport.save('raskroy-' + (fo ? slug(folderLabel(fo)) : dateStamp()) + '.xlsx', RKExport.xlsx(xlsxSheets(items)));
         });
     }
     /* «Скачать всё одним файлом»: один PDF со всеми работами (на телефоне нет папок и архивов) */
-    function downloadAllPdf(btn) {
+    function downloadAllPdf(btn, list, fo) {
         runExport(btn, async function () {
             await RKExport.fontsReady();
             var items = [];
-            for (var i = 0; i < projects.list.length; i++) {
-                var it = projects.list[i], out = await workResultP(it);
+            list = list || orderedWorks();
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i], out = await workResultP(it);
                 if (out.length) items.push({ it: it, out: out });
             }
             if (!items.length) return t('x.none');
-            var doc = new RKExport.Doc({ footer: t('brand') + ' · ' + dateStamp(), title: t('x.pdf.all') });
-            if (items.length > 1) {
-                doc.h1(t('x.pdf.all'));
+            var title = fo ? folderLabel(fo) : t('x.pdf.all');
+            var doc = new RKExport.Doc({ footer: t('brand') + ' · ' + dateStamp(), title: title });
+            if (items.length > 1 || fo) {
+                doc.h1(title);
                 doc.muted(dateStamp());
                 doc.space(14);
                 doc.table([{ label: t('x.work'), w: 4 }, { label: t('x.col.sheets'), w: 1.2, align: 'right' }, { label: t('x.col.parts'), w: 1.2, align: 'right' }, { label: t('x.col.used'), w: 1.8, align: 'right' }],
@@ -1187,11 +1298,159 @@
                     }));
             }
             for (var k = 0; k < items.length; k++) {
-                if (items.length > 1 || k > 0) doc.pageBreak();
+                if (items.length > 1 || fo || k > 0) doc.pageBreak();
                 await addWorkToDoc(doc, items[k].it, items[k].out, function (i, n) { toast(t('x.progress', { i: i, n: n }) + ' (' + (k + 1) + '/' + items.length + ')'); });
             }
-            RKExport.save('raskroy-' + dateStamp() + '.pdf', await doc.blob());
+            RKExport.save('raskroy-' + (fo ? slug(folderLabel(fo)) : dateStamp()) + '.pdf', await doc.blob());
         });
+    }
+
+    /* ---------- Папки ---------- */
+    function newFolderId() { return 'f' + Date.now().toString(36) + Math.floor(Math.random() * 1000); }
+    function createFolder(after) {
+        RKDialog.prompt(t('fo.name'), { value: t('fo.default', { n: projects.folders.length + 1 }), ok: t('fo.create'), placeholder: t('fo.ph') }).then(function (name) {
+            if (typeof name !== 'string') return;
+            var fo = { id: newFolderId(), name: name.slice(0, 60), open: true };
+            projects.folders.push(fo);
+            saveNow(); renderWorks();
+            toast(t('fo.created', { name: folderLabel(fo) }));
+            if (after) after(fo);
+        });
+    }
+    function renameFolder(fo) {
+        RKDialog.prompt(t('fo.name'), { value: fo.name || folderLabel(fo), ok: t('d.ok') }).then(function (name) {
+            if (typeof name !== 'string') return;
+            fo.name = name.slice(0, 60);
+            saveNow(); renderWorks();
+        });
+    }
+    function deleteFolder(fo) {
+        RKDialog.ask(true, t('fo.delconfirm', { name: folderLabel(fo) }), { ok: t('d.delete'), danger: true }, function () {
+            projects.list.forEach(function (it) { if (it.f === fo.id) it.f = ''; });
+            projects.folders.splice(projects.folders.indexOf(fo), 1);
+            saveNow(); renderTabs(); renderWorks();
+        });
+    }
+    function moveToFolder(it) {
+        var opts = [{ v: '', label: t('fo.none') }];
+        projects.folders.forEach(function (fo) { opts.push({ v: fo.id, label: folderLabel(fo) }); });
+        opts.push({ v: '+', label: t('fo.newopt'), add: true });
+        RKDialog.pick(t('fo.move.title', { name: workLabel(it) }), opts, { current: it.f || '' }).then(function (v) {
+            if (typeof v !== 'string') return;
+            function put(fid) {
+                it.f = fid; saveNow(); renderTabs(); renderWorks();
+                var fo = folderById(fid);
+                toast(fo ? t('fo.moved', { w: workLabel(it), f: folderLabel(fo) }) : t('fo.unmoved', { w: workLabel(it) }));
+            }
+            if (v === '+') createFolder(function (fo) { put(fo.id); });
+            else put(v);
+        });
+    }
+
+    function workRow(it, many, done) {
+        var on = it.id === projects.active;
+        var row = el('div', 'rk-work' + (on ? ' is-active' : ''));
+        var info = el('div', 'rk-work-info');
+        var nm = el('div', 'rk-work-name');
+        var nt = el('span'); nt.textContent = workLabel(it);
+        nm.appendChild(nt);
+        if (on) { var bd = el('span', 'rk-work-badge'); bd.textContent = t('w.current'); nm.appendChild(bd); }
+        var meta = el('div', 'rk-work-meta'); meta.textContent = t('w.calc');
+        info.appendChild(nm); info.appendChild(meta);
+        var acts = el('div', 'rk-work-acts');
+        if (!on) {
+            var ob = el('button', 'rk-btn rk-btn--ghost', { type: 'button' }); ob.textContent = t('w.open');
+            ob.addEventListener('click', function () {
+                switchTo(it.id);
+                var hd = document.getElementById('rk-h-parts');
+                if (hd) hd.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            acts.appendChild(ob);
+        }
+        [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.zip', ' only-desk', null]].forEach(function (d) {
+            var db = el('button', 'rk-btn rk-btn--ghost' + d[1], { type: 'button' }); db.textContent = t(d[0]);
+            db.addEventListener('click', function () {
+                if (d[2]) d[2](it, db);
+                else runExport(db, async function () {
+                    await RKExport.fontsReady();
+                    var out = await workResultP(it);
+                    if (!out.length) return t('x.none');
+                    RKExport.save('raskroy-' + slug(workLabel(it)) + '.zip', RKExport.zip(await workZipFiles(it, out, '')));
+                });
+            });
+            acts.appendChild(db);
+        });
+        var mb = el('button', 'rk-btn rk-btn--ghost rk-work-mv', { type: 'button' }); mb.textContent = t('fo.move');
+        mb.addEventListener('click', function () { moveToFolder(it); });
+        acts.appendChild(mb);
+        if (many) {
+            var xb = el('button', 'rk-btn rk-btn--danger', { type: 'button', 'aria-label': t('w.close', { name: workLabel(it) }) }); xb.textContent = t('w.del');
+            xb.addEventListener('click', function () { closeWork(it.id); });
+            acts.appendChild(xb);
+        }
+        row.appendChild(info); row.appendChild(acts);
+
+        /* сводка: деталей, листов, процент использования, дата последнего изменения */
+        var pc = 0;
+        it.state.parts.forEach(function (p) {
+            if (p.l && p.w && p.qty && it.state.materials.some(function (m) { return m.id === p.mat; })) pc += p.qty;
+        });
+        var when = whenText(it.u);
+        if (!pc) { meta.textContent = t('w.empty') + (when ? ' · ' + when : ''); if (done) done(0, 0); return row; }
+        workResult(it, function (out) {
+            var sheets = 0, used = 0, total = 0;
+            out.forEach(function (r) { sheets += r.res.stats.sheets; used += r.res.stats.usedArea; total += r.res.stats.sheets * r.res.stats.sheetArea; });
+            meta.textContent = t('r.parts') + ': ' + fmt(pc) + ' · ' + t('status', { n: sheets, pl: plural(sheets, 'sheet.pl'), u: fmt(total ? used / total * 100 : 0, 1) }) + (when ? ' · ' + when : '');
+            if (done) done(sheets, pc);
+        });
+        return row;
+    }
+
+    function folderNode(fo, many) {
+        var items = worksIn(fo.id);
+        var node = el('section', 'rk-folder' + (fo.open ? ' is-open' : ''));
+        var head = el('div', 'rk-folder-head');
+        var tg = el('button', 'rk-folder-tg', { type: 'button', 'aria-expanded': String(!!fo.open), 'aria-label': t('fo.toggle', { name: folderLabel(fo) }) });
+        tg.innerHTML = '<svg class="rk-folder-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><svg class="rk-folder-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+        var tx = el('span', 'rk-folder-tx'), nmEl = el('b'), mt = el('small');
+        nmEl.textContent = folderLabel(fo);
+        mt.textContent = items.length ? t('fo.count', { n: items.length, pl: plural(items.length, 'fo.work.pl') }) : t('fo.emptyshort');
+        tx.appendChild(nmEl); tx.appendChild(mt); tg.appendChild(tx);
+        tg.addEventListener('click', function () {
+            fo.open = !fo.open; saveNow();
+            node.classList.toggle('is-open', fo.open);
+            tg.setAttribute('aria-expanded', String(fo.open));
+        });
+        head.appendChild(tg);
+
+        var acts = el('div', 'rk-folder-acts');
+        function btn(label, cls, fn) {
+            var b = el('button', 'rk-btn ' + cls, { type: 'button' }); b.textContent = label;
+            b.addEventListener('click', function () { fn(b); });
+            acts.appendChild(b); return b;
+        }
+        if (items.length) {
+            btn(t('fo.dl'), 'rk-btn--main rk-folder-dl', function (b) { downloadAllPdf(b, items, fo); });
+            btn(t('w.xlsx'), 'rk-btn--ghost', function (b) { downloadAllXlsx(b, items, fo); });
+            btn(t('w.zip'), 'rk-btn--ghost only-desk', function (b) { downloadAllZip(b, items, fo); });
+        }
+        btn(t('fo.addwork'), 'rk-btn--ghost', function () { fo.open = true; newWork(fo.id); });
+        btn(t('fo.rename'), 'rk-btn--ghost', function () { renameFolder(fo); });
+        btn(t('fo.del'), 'rk-btn--danger', function () { deleteFolder(fo); });
+        head.appendChild(acts);
+        node.appendChild(head);
+
+        var body = el('div', 'rk-folder-body');
+        if (!items.length) { var em = el('p', 'rk-folder-empty'); em.textContent = t('fo.empty'); body.appendChild(em); }
+        var left = items.length, sheets = 0, pcs = 0;
+        items.forEach(function (it) {
+            body.appendChild(workRow(it, many, function (sh, pc) {
+                sheets += sh; pcs += pc;
+                if (--left === 0) mt.textContent = t('fo.count', { n: items.length, pl: plural(items.length, 'fo.work.pl') }) + ' · ' + t('r.parts') + ': ' + fmt(pcs) + ' · ' + fmt(sheets) + ' ' + plural(sheets, 'sheet.pl');
+            }));
+        });
+        node.appendChild(body);
+        return node;
     }
 
     function renderWorks() {
@@ -1199,61 +1458,15 @@
         if (!box) return;
         box.innerHTML = '';
         var many = projects.list.length > 1;
-        projects.list.forEach(function (it) {
-            var on = it.id === projects.active;
-            var row = el('div', 'rk-work' + (on ? ' is-active' : ''));
-            var info = el('div', 'rk-work-info');
-            var nm = el('div', 'rk-work-name');
-            var nt = el('span'); nt.textContent = workLabel(it);
-            nm.appendChild(nt);
-            if (on) { var bd = el('span', 'rk-work-badge'); bd.textContent = t('w.current'); nm.appendChild(bd); }
-            var meta = el('div', 'rk-work-meta'); meta.textContent = t('w.calc');
-            info.appendChild(nm); info.appendChild(meta);
-            var acts = el('div', 'rk-work-acts');
-            if (!on) {
-                var ob = el('button', 'rk-btn rk-btn--ghost', { type: 'button' }); ob.textContent = t('w.open');
-                ob.addEventListener('click', function () {
-                    switchTo(it.id);
-                    var hd = document.getElementById('rk-h-parts');
-                    if (hd) hd.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-                acts.appendChild(ob);
-            }
-            [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.zip', ' only-desk', null]].forEach(function (d) {
-                var db = el('button', 'rk-btn rk-btn--ghost' + d[1], { type: 'button' }); db.textContent = t(d[0]);
-                db.addEventListener('click', function () {
-                    if (d[2]) d[2](it, db);
-                    else runExport(db, async function () {
-                        await RKExport.fontsReady();
-                        var out = await workResultP(it);
-                        if (!out.length) return t('x.none');
-                        RKExport.save('raskroy-' + slug(workLabel(it)) + '.zip', RKExport.zip(await workZipFiles(it, out, '')));
-                    });
-                });
-                acts.appendChild(db);
-            });
-            if (many) {
-                var xb = el('button', 'rk-btn rk-btn--danger', { type: 'button', 'aria-label': t('w.close', { name: workLabel(it) }) }); xb.textContent = t('w.del');
-                xb.addEventListener('click', function () { closeWork(it.id); });
-                acts.appendChild(xb);
-            }
-            row.appendChild(info); row.appendChild(acts);
-            box.appendChild(row);
-
-            /* сводка: деталей, листов, процент использования, дата последнего изменения */
-            var pc = 0;
-            it.state.parts.forEach(function (p) {
-                if (p.l && p.w && p.qty && it.state.materials.some(function (m) { return m.id === p.mat; })) pc += p.qty;
-            });
-            var when = whenText(it.u);
-            if (!pc) { meta.textContent = t('w.empty') + (when ? ' · ' + when : ''); return; }
-            workResult(it, function (out) {
-                var sheets = 0, used = 0, total = 0;
-                out.forEach(function (r) { sheets += r.res.stats.sheets; used += r.res.stats.usedArea; total += r.res.stats.sheets * r.res.stats.sheetArea; });
-                meta.textContent = t('r.parts') + ': ' + fmt(pc) + ' · ' + t('status', { n: sheets, pl: plural(sheets, 'sheet.pl'), u: fmt(total ? used / total * 100 : 0, 1) }) + (when ? ' · ' + when : '');
-            });
-        });
+        projects.folders.forEach(function (fo) { box.appendChild(folderNode(fo, many)); });
+        var loose = worksIn('');
+        if (projects.folders.length && loose.length) {
+            var h = el('h3', 'rk-wloose'); h.textContent = t('fo.ungrouped'); box.appendChild(h);
+        }
+        loose.forEach(function (it) { box.appendChild(workRow(it, many)); });
     }
+    var nf = document.getElementById('rk-newfolder');
+    if (nf) nf.addEventListener('click', function () { createFolder(); });
 
 
     /* ---------- Импорт из Базис: CSV, JSON, xlsx ---------- */
@@ -1535,7 +1748,7 @@
         var n = 0;
         projects.list.forEach(function (it) { if (it.n > n) n = it.n; });
         var id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1000);
-        var item = { id: id, n: n + 1, name: name || '', u: Date.now(), state: st };
+        var item = { id: id, n: n + 1, name: name || '', u: Date.now(), f: activeItem().f || '', state: st };
         saveNow();
         projects.list.push(item);
         projects.active = id;
@@ -1568,13 +1781,20 @@
         if (!obj || obj.app !== 'raskroy' || !Array.isArray(src)) return -1;
         var nmax = 0, ids = {}, added = 0;
         projects.list.forEach(function (it) { if (it.n > nmax) nmax = it.n; ids[it.id] = 1; });
+        var fmap = {};
+        (Array.isArray(obj.projects.folders) ? obj.projects.folders : []).forEach(function (fo) {
+            if (!fo || !fo.id) return;
+            var fid = String(fo.id), have = projects.folders.filter(function (x) { return x.id === fid; })[0];
+            if (!have) { have = { id: fid, name: String(fo.name || '').slice(0, 60), open: true }; projects.folders.push(have); }
+            fmap[fid] = have.id;
+        });
         src.forEach(function (it) {
             var st = normalizeState(it && it.state);
             if (!st) return;
             var id = String((it && it.id) || '');
             if (!id || ids[id]) id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1000) + added;
             ids[id] = 1;
-            projects.list.push({ id: id, n: ++nmax, name: String(it.name || '').slice(0, 60), u: Number(it.u) || Date.now(), state: st });
+            projects.list.push({ id: id, n: ++nmax, name: String(it.name || '').slice(0, 60), u: Number(it.u) || Date.now(), f: fmap[String(it.f)] || '', state: st });
             added++;
         });
         if (added) { saveNow(); renderTabs(); renderWorks(); }
@@ -1725,13 +1945,13 @@
     }
 
     /* новая работа берёт материалы и настройки текущей, детали пустые */
-    function newWork() {
+    function newWork(fid) {
         var n = 0;
         projects.list.forEach(function (it) { if (it.n > n) n = it.n; });
         var base = JSON.parse(JSON.stringify(state));
         var st = { settings: base.settings, materials: base.materials, parts: [{ name: '', mat: base.materials[0].id, l: 0, w: 0, qty: 1, rotate: true, e: [0, 0, 0, 0] }] };
         var id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1000);
-        var item = { id: id, n: n + 1, name: '', u: Date.now(), state: st };
+        var item = { id: id, n: n + 1, name: '', u: Date.now(), f: typeof fid === 'string' ? fid : (activeItem().f || ''), state: st };
         saveNow();
         projects.list.push(item);
         projects.active = id;
