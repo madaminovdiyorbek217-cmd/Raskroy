@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '32';
+    var VERSION = '36';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -610,24 +610,50 @@
         this.setAttribute('aria-expanded', String(!pasteBox.hidden));
         if (!pasteBox.hidden) $('#rk-paste-text').focus();
     });
+    /* Умный разбор: сообщения из мессенджера, «на», «шт», см, несколько деталей в строке */
+    var pasteText = $('#rk-paste-text'), pasteNote = $('#rk-paste-note'), pastePrev = $('#rk-paste-prev');
+    function pasteParsed() { return window.RKParse ? RKParse.parts(pasteText.value) : { items: [], skipped: [] }; }
+    function renderPastePrev() {
+        var r = pasteParsed(), um = ' ' + t('u.mm');
+        pastePrev.hidden = !pasteText.value.trim();
+        if (pastePrev.hidden) { pasteNote.textContent = ''; return; }
+        var pcs = 0; r.items.forEach(function (x) { pcs += x.qty; });
+        var html = '';
+        if (r.items.length) {
+            html += '<table class="rk-pp"><tbody>';
+            r.items.slice(0, 30).forEach(function (x) {
+                html += '<tr><td>' + esc(x.name || t('paste.noname')) + '</td><td>' + esc(mmf(x.l) + ' × ' + mmf(x.w)) + '</td><td>' + x.qty + ' ' + esc(t('paste.pcs')) + '</td></tr>';
+            });
+            if (r.items.length > 30) html += '<tr><td colspan="3">… +' + (r.items.length - 30) + '</td></tr>';
+            html += '</tbody></table>';
+        }
+        if (r.skipped.length) html += '<p class="rk-pp-bad">' + esc(t('paste.bad', { s: r.skipped.length })) + ': ' + esc(r.skipped.slice(0, 3).join(' | ')) + '</p>';
+        pastePrev.innerHTML = html;
+        pasteNote.textContent = r.items.length ? t('paste.found', { n: r.items.length, p: pcs }) : t('paste.none');
+    }
+    pasteText.addEventListener('input', renderPastePrev);
+    $('#rk-paste-clip').addEventListener('click', function () {
+        if (!navigator.clipboard || !navigator.clipboard.readText) { pasteNote.textContent = t('paste.noclip'); pasteText.focus(); return; }
+        navigator.clipboard.readText().then(function (txt) {
+            if (txt) { pasteText.value = pasteText.value ? pasteText.value.replace(/\s+$/, '') + '\n' + txt : txt; renderPastePrev(); }
+            else pasteNote.textContent = t('paste.emptyclip');
+        }, function () { pasteNote.textContent = t('paste.noclip'); pasteText.focus(); });
+    });
     $('#rk-paste-go').addEventListener('click', function () {
-        var text = $('#rk-paste-text').value;
-        var mat = $('#rk-paste-mat').value;
-        var added = 0, skipped = 0;
-        text.split(/\r?\n/).forEach(function (line) {
-            if (!line.trim()) return;
-            var r = parseLine(line);
-            if (!r) { skipped++; return; }
-            state.parts.push({ name: r.name, mat: mat, l: r.l, w: r.w, qty: r.qty, rotate: true, e: [0, 0, 0, 0] });
-            added++;
+        var mat = $('#rk-paste-mat').value, r = pasteParsed();
+        r.items.forEach(function (x) {
+            state.parts.push({ name: x.name, mat: mat, l: x.l, w: x.w, qty: x.qty, rotate: true, e: [0, 0, 0, 0] });
         });
-        $('#rk-paste-note').textContent = added ? t('paste.added', { a: added }) + (skipped ? t('paste.skipped', { s: skipped }) : '') : t('paste.none');
-        if (added) { $('#rk-paste-text').value = ''; renderParts(); changed(true); }
+        if (r.items.length) {
+            pasteNote.textContent = t('paste.added', { a: r.items.length }) + (r.skipped.length ? t('paste.skipped', { s: r.skipped.length }) : '');
+            pasteText.value = ''; pastePrev.hidden = true; pastePrev.innerHTML = '';
+            renderParts(); changed(true);
+        } else pasteNote.textContent = t('paste.none');
     });
 
     /* ---------- Расчёт ---------- */
     var pool = [], workerFailed = false, reqId = 0, callbacks = {};
-    var MAXW = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1));
+    var MAXW = Math.max(1, Math.min(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 2 : 3, (navigator.hardwareConcurrency || 2) - 1));
     function spawn() {
         if (workerFailed || typeof Worker === 'undefined') return null;
         try {
@@ -649,24 +675,34 @@
             return w;
         } catch (err) { workerFailed = true; return null; }
     }
-    function getWorker() {
-        if (workerFailed) return null;
-        var free = null;
-        pool.forEach(function (w) { if (!free || w.busy < free.busy) free = w; });
-        if (free && free.busy === 0) return free;
-        if (pool.length < MAXW) { var n = spawn(); if (n) return n; }
-        return free || spawn();
+    /* Очередь расчётов: задачи берутся по мере освобождения потоков, а устаревшие (пользователь уже поменял данные) выбрасываются,
+       так что быстрый ввод не копит десятки ненужных расчётов и телефон не греется. */
+    var queue = [];
+    function dispatch(job, w) {
+        var id = ++reqId;
+        callbacks[id] = function (res) { if (res) job.cb(res); else job.cb(syncSolve(job.cfg)); pump(); };
+        w.busy++;
+        w.postMessage({ id: id, cfg: job.cfg });
     }
-    function solve(cfg, cb) {
-        var w = getWorker();
-        if (w) {
-            var id = ++reqId; callbacks[id] = function (res, err) {
-                if (res) cb(res); else cb(syncSolve(cfg));
-            };
-            w.busy++;
-            w.postMessage({ id: id, cfg: cfg });
-        } else cb(syncSolve(cfg));
+    function pump() {
+        while (queue.length) {
+            var job = queue[0];
+            if (job.alive && !job.alive()) { queue.shift(); continue; }
+            var w = null;
+            if (!workerFailed) {
+                pool.forEach(function (x) { if (!w && x.busy === 0) w = x; });
+                if (!w && pool.length < MAXW) w = spawn();
+            }
+            if (!w) {
+                if (workerFailed) { queue.shift(); fallback(job); }
+                return;
+            }
+            queue.shift();
+            dispatch(job, w);
+        }
     }
+    function fallback(job) { setTimeout(function () { job.cb(syncSolve(job.cfg)); pump(); }, 0); }
+    function solve(cfg, cb, alive) { queue.push({ cfg: cfg, cb: cb, alive: alive }); pump(); }
     function syncSolve(cfg) { return window.Raskroy.optimize(cfg); }
 
 
@@ -685,9 +721,9 @@
     function resScore(res) {
         return res.unplaced.length * 1e16 + res.stats.sheets * 1e13 - maxFreeArea(res) + res.stats.cuts * 0.01;
     }
-    function solveJob(j, cb) {
+    function solveJob(j, cb, alive) {
         var cfg = j.cfg;
-        if (!cfg.auto) { solve(cfg, cb); return; }
+        if (!cfg.auto) { solve(cfg, cb, alive); return; }
         var n = AUTO_VARIANTS.length, got = new Array(n), left = n;
         var per = Math.max(200, Math.round(cfg.timeMs * 0.6));
         AUTO_VARIANTS.forEach(function (v, i) {
@@ -705,7 +741,7 @@
                     worstSheets: got[worst].stats.sheets, worstUtil: got[worst].stats.util, bestSheets: res.stats.sheets, bestUtil: res.stats.util
                 };
                 cb(res);
-            });
+            }, alive);
         });
     }
 
@@ -750,7 +786,7 @@
                 if (token !== runToken) return;
                 out[idx] = { mat: j.mat, res: res, cfg: j.cfg };
                 if (--left === 0) { lastResult = out; lastResultSig = sigAtRun; renderResults(out); }
-            });
+            }, function () { return token === runToken; });
         });
     }
 
@@ -965,7 +1001,10 @@
     /* подсветка: наведите на деталь на карте или строку в списке, остальные приглушатся */
     (function () {
         var out = $('#rk-out');
+        var lastMark = null, canHover = !(window.matchMedia && matchMedia('(hover: none)').matches);
         function mark(id) {
+            if (!canHover || id === lastMark) return;
+            lastMark = id;
             $$('.rk-pc, .rk-legend tbody tr', out).forEach(function (n) {
                 n.classList.toggle('is-dim', id !== null && n.getAttribute('data-id') !== id);
             });
@@ -1160,6 +1199,35 @@
             var cv = await sheetImage(r, sh, r.res.stats.sheets, state.settings.trim, 'p' + ri + '-' + si);
             RKExport.save('list-' + slug(r.mat.name) + '-' + sh.index + '.png', await RKExport.toBlob(cv, 'image/png'));
             return t('x.png.done');
+        });
+    }
+
+    /* Фото листов: каждый лист отдельной картинкой. entries: [{ it, out }] (out можно не передавать — посчитаем) */
+    function openPhotos(entries, title, btn) {
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var files = [], used = {}, multi = entries.length > 1;
+            for (var e = 0; e < entries.length; e++) {
+                var en = entries[e], out = en.out || await workResultP(en.it);
+                var trim = (en.it ? en.it.state : state).settings.trim, wl = en.it ? workLabel(en.it) : '';
+                for (var ri = 0; ri < out.length; ri++) {
+                    var r = out[ri];
+                    for (var si = 0; si < r.res.sheets.length; si++) {
+                        var sh = r.res.sheets[si];
+                        var cv = await sheetImage(r, sh, r.res.stats.sheets, trim, 'ph' + e + '-' + ri + '-' + si);
+                        var base = (multi && wl ? slug(wl) + '-' : '') + slug(r.mat.name) + '-' + sh.index, nm = base + '.png', k = 1;
+                        while (used[nm]) nm = base + '-' + (++k) + '.png';
+                        used[nm] = 1;
+                        files.push({
+                            name: nm, blob: await RKExport.toBlob(cv, 'image/png'),
+                            label: (multi && wl ? wl + ' · ' : '') + (r.mat.name || t('m.fallback')) + ' · ' + t('x.pdf.sheetof', { i: sh.index, n: r.res.stats.sheets })
+                        });
+                    }
+                }
+            }
+            if (!files.length) return t('x.none');
+            RKPhotos.open({ title: title || t('ph.title'), items: files });
+            return t('ph.ready', { n: files.length });
         });
     }
 
@@ -1367,7 +1435,7 @@
             });
             acts.appendChild(ob);
         }
-        [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.zip', ' only-desk', null]].forEach(function (d) {
+        [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.photo', '', function (it2, b2) { openPhotos([{ it: it2 }], workLabel(it2), b2); }], ['w.zip', ' only-desk', null]].forEach(function (d) {
             var db = el('button', 'rk-btn rk-btn--ghost' + d[1], { type: 'button' }); db.textContent = t(d[0]);
             db.addEventListener('click', function () {
                 if (d[2]) d[2](it, db);
@@ -1432,6 +1500,7 @@
         if (items.length) {
             btn(t('fo.dl'), 'rk-btn--main rk-folder-dl', function (b) { downloadAllPdf(b, items, fo); });
             btn(t('w.xlsx'), 'rk-btn--ghost', function (b) { downloadAllXlsx(b, items, fo); });
+            btn(t('w.photo'), 'rk-btn--ghost', function (b) { openPhotos(items.map(function (x) { return { it: x }; }), folderLabel(fo), b); });
             btn(t('w.zip'), 'rk-btn--ghost only-desk', function (b) { downloadAllZip(b, items, fo); });
         }
         btn(t('fo.addwork'), 'rk-btn--ghost', function () { fo.open = true; newWork(fo.id); });
@@ -1854,6 +1923,10 @@
     $('#rk-restore').addEventListener('click', function () { restFile.value = ''; restFile.click(); });
     restFile.addEventListener('change', function () { if (restFile.files && restFile.files[0]) restoreFile(restFile.files[0]); });
 
+    $('#rk-photos').addEventListener('click', function () {
+        if (!lastResult || !lastResult.length) { toast(t('x.none')); return; }
+        openPhotos([{ out: lastResult }], workLabel(activeItem()), this);
+    });
     $('#rk-zip-all').addEventListener('click', function () { downloadAllPdf(this); });
     $('#rk-xlsx-all').addEventListener('click', function () { downloadAllXlsx(this); });
     $('#rk-zip-desk').addEventListener('click', function () { downloadAllZip(this); });

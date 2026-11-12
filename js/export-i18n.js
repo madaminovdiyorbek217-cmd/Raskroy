@@ -174,3 +174,38 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'paste.ph': 'Например:\nБоковина 720х560 - 2 шт\nПолка 800 на 300 по 4\n70х50 см 2шт',
+            'paste.clip': 'Вставить из буфера', 'paste.hint': 'Можно вставить сообщение заказчика как есть: «Боковина 720х560 - 2 шт», «полка 800 на 300 по 4», «70х50 см».',
+            'paste.found': 'Распознано деталей: {n} ({p} шт.)', 'paste.noname': 'Без названия', 'paste.pcs': 'шт.', 'paste.bad': 'Не понял строк: {s}',
+            'paste.noclip': 'Браузер не дал доступ к буферу: вставьте текст в поле вручную (долгое нажатие → «Вставить»).', 'paste.emptyclip': 'Буфер обмена пуст' },
+        en: { 'paste.ph': 'For example:\nSide 720x560 - 2 pcs\nShelf 800 by 300 x4\n70x50 cm 2pcs',
+            'paste.clip': 'Paste from clipboard', 'paste.hint': 'You can paste the customer’s message as it is: “Side 720x560 - 2 pcs”, “shelf 800 by 300 x4”, “70x50 cm”.',
+            'paste.found': 'Parts recognised: {n} ({p} pcs)', 'paste.noname': 'Unnamed', 'paste.pcs': 'pcs', 'paste.bad': 'Lines not understood: {s}',
+            'paste.noclip': 'The browser did not allow clipboard access: paste the text into the field manually (long press → Paste).', 'paste.emptyclip': 'Clipboard is empty' },
+        uz: { 'paste.ph': 'Masalan:\nYon devor 720x560 - 2 dona\nPolka 800 ga 300 4 ta\n70x50 sm 2 ta',
+            'paste.clip': 'Buferdan qo‘yish', 'paste.hint': 'Buyurtmachi xabarini o‘zgartirmay qo‘yishingiz mumkin: «Yon devor 720x560 - 2 dona», «polka 800 ga 300 4 ta», «70x50 sm».',
+            'paste.found': 'Taniqlangan detallar: {n} ({p} dona)', 'paste.noname': 'Nomsiz', 'paste.pcs': 'dona', 'paste.bad': 'Tushunilmagan qatorlar: {s}',
+            'paste.noclip': 'Brauzer buferga ruxsat bermadi: matnni maydonga qo‘lda qo‘ying (uzoq bosish → Qo‘yish).', 'paste.emptyclip': 'Bufer bo‘sh' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'b.photos': 'Фото листов', 'w.photo': 'Фото', 'ph.title': 'Фото листов', 'ph.sub': 'Каждый лист — отдельная картинка. Нажмите на картинку, чтобы увеличить.',
+            'ph.save': 'Скачать фото', 'ph.all': 'Скачать все ({n})', 'ph.ready': 'Фото готовы: {n}', 'r.svg': 'Скачать фото' },
+        en: { 'b.photos': 'Sheet photos', 'w.photo': 'Photos', 'ph.title': 'Sheet photos', 'ph.sub': 'Each sheet is a separate picture. Tap a picture to enlarge it.',
+            'ph.save': 'Download photo', 'ph.all': 'Download all ({n})', 'ph.ready': 'Photos ready: {n}', 'r.svg': 'Download photo' },
+        uz: { 'b.photos': 'Varaq rasmlari', 'w.photo': 'Rasm', 'ph.title': 'Varaq rasmlari', 'ph.sub': 'Har bir varaq alohida rasm. Kattalashtirish uchun rasmni bosing.',
+            'ph.save': 'Rasmni yuklash', 'ph.all': 'Hammasini yuklash ({n})', 'ph.ready': 'Rasmlar tayyor: {n}', 'r.svg': 'Rasmni yuklash' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
