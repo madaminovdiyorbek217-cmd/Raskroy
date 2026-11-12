@@ -163,3 +163,86 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'w.newname': 'Название новой работы (например, имя заказчика)', 'w.create': 'Создать', 'w.ph': 'Название работы', 'fb.newname': 'Название нового изделия (например, диван Иванова)', 'fb.ph': 'Название изделия' },
+        en: { 'w.newname': 'Name of the new project (e.g. the customer’s name)', 'w.create': 'Create', 'w.ph': 'Project name', 'fb.newname': 'Name of the new item (e.g. Ivanov’s sofa)', 'fb.ph': 'Item name' },
+        uz: { 'w.newname': 'Yangi ish nomi (masalan, buyurtmachi ismi)', 'w.create': 'Yaratish', 'w.ph': 'Ish nomi', 'fb.newname': 'Yangi buyum nomi (masalan, Ivanovning divani)', 'fb.ph': 'Buyum nomi' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'paste.ph': 'Например:\nБоковина 720х560 - 2 шт\nПолка 800 на 300 по 4\n70х50 см 2шт',
+            'paste.clip': 'Вставить из буфера', 'paste.hint': 'Можно вставить сообщение заказчика как есть: «Боковина 720х560 - 2 шт», «полка 800 на 300 по 4», «70х50 см».',
+            'paste.found': 'Распознано деталей: {n} ({p} шт.)', 'paste.noname': 'Без названия', 'paste.pcs': 'шт.', 'paste.bad': 'Не понял строк: {s}',
+            'paste.noclip': 'Браузер не дал доступ к буферу: вставьте текст в поле вручную (долгое нажатие → «Вставить»).', 'paste.emptyclip': 'Буфер обмена пуст' },
+        en: { 'paste.ph': 'For example:\nSide 720x560 - 2 pcs\nShelf 800 by 300 x4\n70x50 cm 2pcs',
+            'paste.clip': 'Paste from clipboard', 'paste.hint': 'You can paste the customer’s message as it is: “Side 720x560 - 2 pcs”, “shelf 800 by 300 x4”, “70x50 cm”.',
+            'paste.found': 'Parts recognised: {n} ({p} pcs)', 'paste.noname': 'Unnamed', 'paste.pcs': 'pcs', 'paste.bad': 'Lines not understood: {s}',
+            'paste.noclip': 'The browser did not allow clipboard access: paste the text into the field manually (long press → Paste).', 'paste.emptyclip': 'Clipboard is empty' },
+        uz: { 'paste.ph': 'Masalan:\nYon devor 720x560 - 2 dona\nPolka 800 ga 300 4 ta\n70x50 sm 2 ta',
+            'paste.clip': 'Buferdan qo‘yish', 'paste.hint': 'Buyurtmachi xabarini o‘zgartirmay qo‘yishingiz mumkin: «Yon devor 720x560 - 2 dona», «polka 800 ga 300 4 ta», «70x50 sm».',
+            'paste.found': 'Taniqlangan detallar: {n} ({p} dona)', 'paste.noname': 'Nomsiz', 'paste.pcs': 'dona', 'paste.bad': 'Tushunilmagan qatorlar: {s}',
+            'paste.noclip': 'Brauzer buferga ruxsat bermadi: matnni maydonga qo‘lda qo‘ying (uzoq bosish → Qo‘yish).', 'paste.emptyclip': 'Bufer bo‘sh' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'b.photos': 'Фото листов', 'w.photo': 'Фото', 'ph.title': 'Фото листов', 'ph.sub': 'Каждый лист — отдельная картинка. Нажмите на картинку, чтобы увеличить.',
+            'ph.save': 'Скачать фото', 'ph.all': 'Скачать все ({n})', 'ph.ready': 'Фото готовы: {n}', 'r.svg': 'Скачать фото' },
+        en: { 'b.photos': 'Sheet photos', 'w.photo': 'Photos', 'ph.title': 'Sheet photos', 'ph.sub': 'Each sheet is a separate picture. Tap a picture to enlarge it.',
+            'ph.save': 'Download photo', 'ph.all': 'Download all ({n})', 'ph.ready': 'Photos ready: {n}', 'r.svg': 'Download photo' },
+        uz: { 'b.photos': 'Varaq rasmlari', 'w.photo': 'Rasm', 'ph.title': 'Varaq rasmlari', 'ph.sub': 'Har bir varaq alohida rasm. Kattalashtirish uchun rasmni bosing.',
+            'ph.save': 'Rasmni yuklash', 'ph.all': 'Hammasini yuklash ({n})', 'ph.ready': 'Rasmlar tayyor: {n}', 'r.svg': 'Rasmni yuklash' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'b.cabinet': 'Конструктор корпуса 3D', 'cb.title': 'Конструктор корпуса', 'cb.view': '3D-вид корпуса',
+            'cb.hint': 'Потяните, чтобы повернуть; колесо или щипок — приблизить. Двойное нажатие — сбросить вид.',
+            'cb.w': 'Ширина', 'cb.h': 'Высота', 'cb.d': 'Глубина', 'cb.t': 'Толщина плиты', 'cb.plinth': 'Цоколь',
+            'cb.shelves': 'Полок в секции', 'cb.dividers': 'Перегородок', 'cb.doors': 'Дверец', 'cb.drawers': 'Ящиков', 'cb.back': 'Задняя стенка (ДВП)',
+            'cb.open': 'Открыть дверцы и ящики', 'cb.close': 'Закрыть дверцы и ящики', 'cb.reset': 'Сбросить вид',
+            'cb.mat.body': 'Материал корпуса и фасадов', 'cb.mat.back': 'Материал задней стенки и дна ящиков', 'cb.mat.newhdf': 'ДВП 3 мм (создать материал)',
+            'cb.add': 'Добавить в раскрой: {n} деталей ({p} шт.)', 'cb.added': 'Добавлено деталей: {n} ({p} шт.)',
+            'cb.t.wardrobe': 'Шкаф', 'cb.t.base': 'Тумба', 'cb.t.chest': 'Комод', 'cb.t.shelf': 'Стеллаж', 'cb.t.wall': 'Навесной',
+            'cb.p.side': 'Боковина', 'cb.p.topbot': 'Крышка / дно', 'cb.p.divider': 'Перегородка', 'cb.p.shelf': 'Полка', 'cb.p.back': 'Задняя стенка',
+            'cb.p.door': 'Дверца', 'cb.p.dfront': 'Фасад ящика', 'cb.p.dside': 'Ящик: боковина', 'cb.p.dfb': 'Ящик: перед и зад', 'cb.p.dbottom': 'Ящик: дно', 'cb.p.plinth': 'Цоколь' },
+        en: { 'b.cabinet': '3D cabinet builder', 'cb.title': 'Cabinet builder', 'cb.view': '3D view of the cabinet',
+            'cb.hint': 'Drag to rotate; wheel or pinch to zoom. Double tap resets the view.',
+            'cb.w': 'Width', 'cb.h': 'Height', 'cb.d': 'Depth', 'cb.t': 'Board thickness', 'cb.plinth': 'Plinth',
+            'cb.shelves': 'Shelves per section', 'cb.dividers': 'Dividers', 'cb.doors': 'Doors', 'cb.drawers': 'Drawers', 'cb.back': 'Back panel (HDF)',
+            'cb.open': 'Open doors and drawers', 'cb.close': 'Close doors and drawers', 'cb.reset': 'Reset view',
+            'cb.mat.body': 'Material for carcass and fronts', 'cb.mat.back': 'Material for back panel and drawer bottoms', 'cb.mat.newhdf': 'HDF 3 mm (create material)',
+            'cb.add': 'Add to cutting: {n} parts ({p} pcs)', 'cb.added': 'Parts added: {n} ({p} pcs)',
+            'cb.t.wardrobe': 'Wardrobe', 'cb.t.base': 'Base unit', 'cb.t.chest': 'Chest', 'cb.t.shelf': 'Shelving', 'cb.t.wall': 'Wall unit',
+            'cb.p.side': 'Side panel', 'cb.p.topbot': 'Top / bottom', 'cb.p.divider': 'Divider', 'cb.p.shelf': 'Shelf', 'cb.p.back': 'Back panel',
+            'cb.p.door': 'Door', 'cb.p.dfront': 'Drawer front', 'cb.p.dside': 'Drawer: side', 'cb.p.dfb': 'Drawer: front and back', 'cb.p.dbottom': 'Drawer: bottom', 'cb.p.plinth': 'Plinth' },
+        uz: { 'b.cabinet': '3D korpus konstruktori', 'cb.title': 'Korpus konstruktori', 'cb.view': 'Korpusning 3D ko‘rinishi',
+            'cb.hint': 'Aylantirish uchun suring; g‘ildirak yoki ikki barmoq bilan kattalashtiring. Ikki marta bosish — asl holat.',
+            'cb.w': 'Eni', 'cb.h': 'Balandligi', 'cb.d': 'Chuqurligi', 'cb.t': 'Plita qalinligi', 'cb.plinth': 'Sokol',
+            'cb.shelves': 'Seksiyada polkalar', 'cb.dividers': 'To‘siqlar', 'cb.doors': 'Eshiklar', 'cb.drawers': 'Tortmalar', 'cb.back': 'Orqa devor (DVP)',
+            'cb.open': 'Eshik va tortmalarni ochish', 'cb.close': 'Eshik va tortmalarni yopish', 'cb.reset': 'Ko‘rinishni tiklash',
+            'cb.mat.body': 'Korpus va fasadlar materiali', 'cb.mat.back': 'Orqa devor va tortma tagi materiali', 'cb.mat.newhdf': 'DVP 3 mm (material yaratish)',
+            'cb.add': 'Bichishga qo‘shish: {n} ta detal ({p} dona)', 'cb.added': 'Detallar qo‘shildi: {n} ({p} dona)',
+            'cb.t.wardrobe': 'Shkaf', 'cb.t.base': 'Tumba', 'cb.t.chest': 'Komod', 'cb.t.shelf': 'Stellaj', 'cb.t.wall': 'Osma shkaf',
+            'cb.p.side': 'Yon devor', 'cb.p.topbot': 'Qopqoq / tag', 'cb.p.divider': 'To‘siq', 'cb.p.shelf': 'Polka', 'cb.p.back': 'Orqa devor',
+            'cb.p.door': 'Eshik', 'cb.p.dfront': 'Tortma fasadi', 'cb.p.dside': 'Tortma: yon', 'cb.p.dfb': 'Tortma: old va orqa', 'cb.p.dbottom': 'Tortma: tag', 'cb.p.plinth': 'Sokol' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

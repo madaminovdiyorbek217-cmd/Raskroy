@@ -379,5 +379,20 @@
         return Promise.resolve();
     }
 
-    window.RKExport = { zip: zip, xlsx: xlsx, svgToCanvas: svgToCanvas, toBlob: toBlob, Doc: Doc, save: save, offering: function () { return !!offerEl; }, fontsReady: fontsReady, crc32: crc32, FONT: FONT };
+    /* Несколько файлов сразу. Телефон: одно меню «Поделиться» со всеми картинками (оттуда — в Галерею, Telegram...).
+       Компьютер или если меню нет: файлы скачиваются по очереди. */
+    function saveMany(files) {
+        function seq() { files.forEach(function (f, i) { setTimeout(function () { download(f.name, f.blob); }, i * 400); }); }
+        if (isPhone()) {
+            var fs = files.map(function (f) { return mkFile(f.name, f.blob); });
+            var ok = fs.every(Boolean);
+            try { ok = ok && navigator.share && navigator.canShare && navigator.canShare({ files: fs }); } catch (e) { ok = false; }
+            if (ok) {
+                navigator.share({ files: fs }).catch(function (e) { if (e && e.name === 'AbortError') return; seq(); });
+                return;
+            }
+        }
+        seq();
+    }
+    window.RKExport = { saveMany: saveMany, download: download, zip: zip, xlsx: xlsx, svgToCanvas: svgToCanvas, toBlob: toBlob, Doc: Doc, save: save, offering: function () { return !!offerEl; }, fontsReady: fontsReady, crc32: crc32, FONT: FONT };
 })();

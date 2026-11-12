@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '31';
+    var VERSION = '33';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -591,6 +591,32 @@
         });
     });
 
+    /* Конструктор корпуса с 3D-превью */
+    $('#rk-cabinet').addEventListener('click', function () {
+        if (!window.RKCabinet) return;
+        RKCabinet.open({
+            materials: state.materials,
+            onAdd: function (parts, bodyId, backId) {
+                if (backId === '__hdf__') {
+                    var hm = newMat(PRESETS['hdf-2800']);
+                    state.materials.push(hm); backId = hm.id;
+                }
+                var ids = {}; state.materials.forEach(function (m) { ids[m.id] = 1; });
+                if (!ids[bodyId]) bodyId = state.materials[0].id;
+                if (!ids[backId]) backId = bodyId;
+                var pcs = 0;
+                parts.forEach(function (x) {
+                    state.parts.push({ name: x.name, mat: x.back ? backId : bodyId, l: x.l, w: x.w, qty: x.qty, rotate: x.rotate, e: x.e.slice() });
+                    pcs += x.qty;
+                });
+                renderAll(); changed(true);
+                toast(t('cb.added', { n: parts.length, p: pcs }));
+                var hd = document.getElementById('rk-h-parts');
+                if (hd) hd.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
     /* Разбор строки «название 2200 550 2» (числа: длина, ширина, штук) */
     function parseLine(line) {
         line = String(line).trim();
@@ -610,19 +636,45 @@
         this.setAttribute('aria-expanded', String(!pasteBox.hidden));
         if (!pasteBox.hidden) $('#rk-paste-text').focus();
     });
+    /* Умный разбор: сообщения из мессенджера, «на», «шт», см, несколько деталей в строке */
+    var pasteText = $('#rk-paste-text'), pasteNote = $('#rk-paste-note'), pastePrev = $('#rk-paste-prev');
+    function pasteParsed() { return window.RKParse ? RKParse.parts(pasteText.value) : { items: [], skipped: [] }; }
+    function renderPastePrev() {
+        var r = pasteParsed(), um = ' ' + t('u.mm');
+        pastePrev.hidden = !pasteText.value.trim();
+        if (pastePrev.hidden) { pasteNote.textContent = ''; return; }
+        var pcs = 0; r.items.forEach(function (x) { pcs += x.qty; });
+        var html = '';
+        if (r.items.length) {
+            html += '<table class="rk-pp"><tbody>';
+            r.items.slice(0, 30).forEach(function (x) {
+                html += '<tr><td>' + esc(x.name || t('paste.noname')) + '</td><td>' + esc(mmf(x.l) + ' × ' + mmf(x.w)) + '</td><td>' + x.qty + ' ' + esc(t('paste.pcs')) + '</td></tr>';
+            });
+            if (r.items.length > 30) html += '<tr><td colspan="3">… +' + (r.items.length - 30) + '</td></tr>';
+            html += '</tbody></table>';
+        }
+        if (r.skipped.length) html += '<p class="rk-pp-bad">' + esc(t('paste.bad', { s: r.skipped.length })) + ': ' + esc(r.skipped.slice(0, 3).join(' | ')) + '</p>';
+        pastePrev.innerHTML = html;
+        pasteNote.textContent = r.items.length ? t('paste.found', { n: r.items.length, p: pcs }) : t('paste.none');
+    }
+    pasteText.addEventListener('input', renderPastePrev);
+    $('#rk-paste-clip').addEventListener('click', function () {
+        if (!navigator.clipboard || !navigator.clipboard.readText) { pasteNote.textContent = t('paste.noclip'); pasteText.focus(); return; }
+        navigator.clipboard.readText().then(function (txt) {
+            if (txt) { pasteText.value = pasteText.value ? pasteText.value.replace(/\s+$/, '') + '\n' + txt : txt; renderPastePrev(); }
+            else pasteNote.textContent = t('paste.emptyclip');
+        }, function () { pasteNote.textContent = t('paste.noclip'); pasteText.focus(); });
+    });
     $('#rk-paste-go').addEventListener('click', function () {
-        var text = $('#rk-paste-text').value;
-        var mat = $('#rk-paste-mat').value;
-        var added = 0, skipped = 0;
-        text.split(/\r?\n/).forEach(function (line) {
-            if (!line.trim()) return;
-            var r = parseLine(line);
-            if (!r) { skipped++; return; }
-            state.parts.push({ name: r.name, mat: mat, l: r.l, w: r.w, qty: r.qty, rotate: true, e: [0, 0, 0, 0] });
-            added++;
+        var mat = $('#rk-paste-mat').value, r = pasteParsed();
+        r.items.forEach(function (x) {
+            state.parts.push({ name: x.name, mat: mat, l: x.l, w: x.w, qty: x.qty, rotate: true, e: [0, 0, 0, 0] });
         });
-        $('#rk-paste-note').textContent = added ? t('paste.added', { a: added }) + (skipped ? t('paste.skipped', { s: skipped }) : '') : t('paste.none');
-        if (added) { $('#rk-paste-text').value = ''; renderParts(); changed(true); }
+        if (r.items.length) {
+            pasteNote.textContent = t('paste.added', { a: r.items.length }) + (r.skipped.length ? t('paste.skipped', { s: r.skipped.length }) : '');
+            pasteText.value = ''; pastePrev.hidden = true; pastePrev.innerHTML = '';
+            renderParts(); changed(true);
+        } else pasteNote.textContent = t('paste.none');
     });
 
     /* ---------- Расчёт ---------- */
@@ -1163,6 +1215,35 @@
         });
     }
 
+    /* Фото листов: каждый лист отдельной картинкой. entries: [{ it, out }] (out можно не передавать — посчитаем) */
+    function openPhotos(entries, title, btn) {
+        runExport(btn, async function () {
+            await RKExport.fontsReady();
+            var files = [], used = {}, multi = entries.length > 1;
+            for (var e = 0; e < entries.length; e++) {
+                var en = entries[e], out = en.out || await workResultP(en.it);
+                var trim = (en.it ? en.it.state : state).settings.trim, wl = en.it ? workLabel(en.it) : '';
+                for (var ri = 0; ri < out.length; ri++) {
+                    var r = out[ri];
+                    for (var si = 0; si < r.res.sheets.length; si++) {
+                        var sh = r.res.sheets[si];
+                        var cv = await sheetImage(r, sh, r.res.stats.sheets, trim, 'ph' + e + '-' + ri + '-' + si);
+                        var base = (multi && wl ? slug(wl) + '-' : '') + slug(r.mat.name) + '-' + sh.index, nm = base + '.png', k = 1;
+                        while (used[nm]) nm = base + '-' + (++k) + '.png';
+                        used[nm] = 1;
+                        files.push({
+                            name: nm, blob: await RKExport.toBlob(cv, 'image/png'),
+                            label: (multi && wl ? wl + ' · ' : '') + (r.mat.name || t('m.fallback')) + ' · ' + t('x.pdf.sheetof', { i: sh.index, n: r.res.stats.sheets })
+                        });
+                    }
+                }
+            }
+            if (!files.length) return t('x.none');
+            RKPhotos.open({ title: title || t('ph.title'), items: files });
+            return t('ph.ready', { n: files.length });
+        });
+    }
+
     /* Одна работа в PDF-документ: сводка, листы по одному на страницу, список деталей */
     async function addWorkToDoc(doc, it, out, progress) {
         var st = it.state, label = workLabel(it);
@@ -1367,7 +1448,7 @@
             });
             acts.appendChild(ob);
         }
-        [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.zip', ' only-desk', null]].forEach(function (d) {
+        [['w.pdf', '', downloadWorkPdf], ['w.xlsx', '', downloadWorkXlsx], ['w.photo', '', function (it2, b2) { openPhotos([{ it: it2 }], workLabel(it2), b2); }], ['w.zip', ' only-desk', null]].forEach(function (d) {
             var db = el('button', 'rk-btn rk-btn--ghost' + d[1], { type: 'button' }); db.textContent = t(d[0]);
             db.addEventListener('click', function () {
                 if (d[2]) d[2](it, db);
@@ -1432,6 +1513,7 @@
         if (items.length) {
             btn(t('fo.dl'), 'rk-btn--main rk-folder-dl', function (b) { downloadAllPdf(b, items, fo); });
             btn(t('w.xlsx'), 'rk-btn--ghost', function (b) { downloadAllXlsx(b, items, fo); });
+            btn(t('w.photo'), 'rk-btn--ghost', function (b) { openPhotos(items.map(function (x) { return { it: x }; }), folderLabel(fo), b); });
             btn(t('w.zip'), 'rk-btn--ghost only-desk', function (b) { downloadAllZip(b, items, fo); });
         }
         btn(t('fo.addwork'), 'rk-btn--ghost', function () { fo.open = true; newWork(fo.id); });
@@ -1854,6 +1936,10 @@
     $('#rk-restore').addEventListener('click', function () { restFile.value = ''; restFile.click(); });
     restFile.addEventListener('change', function () { if (restFile.files && restFile.files[0]) restoreFile(restFile.files[0]); });
 
+    $('#rk-photos').addEventListener('click', function () {
+        if (!lastResult || !lastResult.length) { toast(t('x.none')); return; }
+        openPhotos([{ out: lastResult }], workLabel(activeItem()), this);
+    });
     $('#rk-zip-all').addEventListener('click', function () { downloadAllPdf(this); });
     $('#rk-xlsx-all').addEventListener('click', function () { downloadAllXlsx(this); });
     $('#rk-zip-desk').addEventListener('click', function () { downloadAllZip(this); });
@@ -1945,13 +2031,23 @@
     }
 
     /* новая работа берёт материалы и настройки текущей, детали пустые */
+    /* Новая работа: сначала окно с названием, и только потом работа создаётся */
     function newWork(fid) {
+        var n0 = 0;
+        projects.list.forEach(function (it) { if (it.n > n0) n0 = it.n; });
+        var def = t('w.default', { n: n0 + 1 });
+        RKDialog.prompt(t('w.newname'), { value: def, ok: t('w.create'), placeholder: t('w.ph') }).then(function (name) {
+            if (typeof name !== 'string') return;
+            createWork(typeof fid === 'string' ? fid : '', name === def ? '' : name);
+        });
+    }
+    function createWork(fid, name) {
         var n = 0;
         projects.list.forEach(function (it) { if (it.n > n) n = it.n; });
         var base = JSON.parse(JSON.stringify(state));
         var st = { settings: base.settings, materials: base.materials, parts: [{ name: '', mat: base.materials[0].id, l: 0, w: 0, qty: 1, rotate: true, e: [0, 0, 0, 0] }] };
         var id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1000);
-        var item = { id: id, n: n + 1, name: '', u: Date.now(), f: typeof fid === 'string' ? fid : (activeItem().f || ''), state: st };
+        var item = { id: id, n: n + 1, name: name || '', u: Date.now(), f: fid || (activeItem().f || ''), state: st };
         saveNow();
         projects.list.push(item);
         projects.active = id;

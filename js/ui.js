@@ -8,6 +8,7 @@
 
     function setTheme(t) {
         root.setAttribute('data-theme', t);
+        if (window.RKLook && window.RKLook.scheme) window.RKLook.scheme();
         btns.forEach(function (b) {
             var on = b.getAttribute('data-set-theme') === t;
             b.setAttribute('aria-checked', String(on));

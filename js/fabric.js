@@ -158,8 +158,17 @@
     }
     function switchTo(id) { saveNow(); state.active = id; saveNow(); renderAll(); }
     function newFabric() {
+        var n0 = 0; state.list.forEach(function (f) { if (f.n > n0) n0 = f.n; });
+        var def = t('fb.tab.def', { n: n0 + 1 });
+        RKDialog.prompt(t('fb.newname'), { value: def, ok: t('w.create'), placeholder: t('fb.ph') }).then(function (name) {
+            if (typeof name !== 'string') return;
+            createFabric(name === def ? '' : name);
+        });
+    }
+    function createFabric(name) {
         var n = 0; state.list.forEach(function (f) { if (f.n > n) n = f.n; });
         var f = blankFabric(n + 1);
+        if (name) f.name = name;
         var cur = active();
         f.roll = cur.roll; f.reserve = cur.reserve; f.round = cur.round;   /* ширина рулона и запас обычно те же */
         state.list.push(f); state.active = f.id;

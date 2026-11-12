@@ -188,6 +188,17 @@ if (window.top !== window.self) {
         return { c: c, tone: tone, img: img, theme: themeFor(tone, c) };
     }
 
+    /* Тёмный режим телефона: браузер сам «затемняет» светлые страницы и портит светлые фоны.
+       Светлая тема объявляет «только светлую» схему, тёмные темы — тёмную, тогда браузер ничего не инвертирует. */
+    function setScheme() {
+        try {
+            var light = root.getAttribute('data-theme') === 'light';
+            var m = document.querySelector('meta[name="color-scheme"]');
+            if (!m) { m = document.createElement('meta'); m.name = 'color-scheme'; document.head.appendChild(m); }
+            m.setAttribute('content', light ? 'only light' : 'dark');
+            root.style.colorScheme = light ? 'only light' : 'dark';
+        } catch (e) { /* не страшно */ }
+    }
     function setMeta(c) { var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', c); }
 
     /* Цвета, зависящие от выбранной темы (светлая или тёмная), считаются от неё */
@@ -237,9 +248,10 @@ if (window.top !== window.self) {
         if (base) setMeta(base);
         else setMeta({ light: '#edf0f6', navy: '#081327', black: '#000000' }[root.getAttribute('data-theme')] || '#081327');
         root.setAttribute('data-look', (look.bg || look.accent) ? '1' : '0');
+        setScheme();
         return r;
     }
 
-    window.RKLook = { BG: BG, ACC: ACC, get: get, save: save, apply: apply, resolveBg: resolveBg, isHex: isHex, byId: byId };
+    window.RKLook = { scheme: setScheme, BG: BG, ACC: ACC, get: get, save: save, apply: apply, resolveBg: resolveBg, isHex: isHex, byId: byId };
     try { apply(get()); } catch (e) { /* без оформления сайт всё равно работает */ }
 })();
