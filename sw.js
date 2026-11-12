@@ -3,7 +3,7 @@
    Новая версия ставится в фоне и включается, когда пользователь нажмёт «Обновить». */
 'use strict';
 
-var VERSION = '33';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
+var VERSION = '34';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
 var CACHE = 'raskroy-v' + VERSION;
 var V = '?v=' + VERSION;
 

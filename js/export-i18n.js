@@ -213,7 +213,7 @@
     'use strict';
     var X = window.RKI18N_EXTRA;
     var T = {
-        ru: { 'b.cabinet': 'Конструктор корпуса 3D', 'cb.title': 'Конструктор корпуса', 'cb.view': '3D-вид корпуса',
+        ru: { 'b.cabinet': 'Конструктор корпуса', 'cb.title': 'Конструктор корпуса', 'cb.view': '3D-вид корпуса',
             'cb.hint': 'Потяните, чтобы повернуть; колесо или щипок — приблизить. Двойное нажатие — сбросить вид.',
             'cb.w': 'Ширина', 'cb.h': 'Высота', 'cb.d': 'Глубина', 'cb.t': 'Толщина плиты', 'cb.plinth': 'Цоколь',
             'cb.shelves': 'Полок в секции', 'cb.dividers': 'Перегородок', 'cb.doors': 'Дверец', 'cb.drawers': 'Ящиков', 'cb.back': 'Задняя стенка (ДВП)',
@@ -223,7 +223,7 @@
             'cb.t.wardrobe': 'Шкаф', 'cb.t.base': 'Тумба', 'cb.t.chest': 'Комод', 'cb.t.shelf': 'Стеллаж', 'cb.t.wall': 'Навесной',
             'cb.p.side': 'Боковина', 'cb.p.topbot': 'Крышка / дно', 'cb.p.divider': 'Перегородка', 'cb.p.shelf': 'Полка', 'cb.p.back': 'Задняя стенка',
             'cb.p.door': 'Дверца', 'cb.p.dfront': 'Фасад ящика', 'cb.p.dside': 'Ящик: боковина', 'cb.p.dfb': 'Ящик: перед и зад', 'cb.p.dbottom': 'Ящик: дно', 'cb.p.plinth': 'Цоколь' },
-        en: { 'b.cabinet': '3D cabinet builder', 'cb.title': 'Cabinet builder', 'cb.view': '3D view of the cabinet',
+        en: { 'b.cabinet': 'Cabinet builder', 'cb.title': 'Cabinet builder', 'cb.view': '3D view of the cabinet',
             'cb.hint': 'Drag to rotate; wheel or pinch to zoom. Double tap resets the view.',
             'cb.w': 'Width', 'cb.h': 'Height', 'cb.d': 'Depth', 'cb.t': 'Board thickness', 'cb.plinth': 'Plinth',
             'cb.shelves': 'Shelves per section', 'cb.dividers': 'Dividers', 'cb.doors': 'Doors', 'cb.drawers': 'Drawers', 'cb.back': 'Back panel (HDF)',
@@ -233,7 +233,7 @@
             'cb.t.wardrobe': 'Wardrobe', 'cb.t.base': 'Base unit', 'cb.t.chest': 'Chest', 'cb.t.shelf': 'Shelving', 'cb.t.wall': 'Wall unit',
             'cb.p.side': 'Side panel', 'cb.p.topbot': 'Top / bottom', 'cb.p.divider': 'Divider', 'cb.p.shelf': 'Shelf', 'cb.p.back': 'Back panel',
             'cb.p.door': 'Door', 'cb.p.dfront': 'Drawer front', 'cb.p.dside': 'Drawer: side', 'cb.p.dfb': 'Drawer: front and back', 'cb.p.dbottom': 'Drawer: bottom', 'cb.p.plinth': 'Plinth' },
-        uz: { 'b.cabinet': '3D korpus konstruktori', 'cb.title': 'Korpus konstruktori', 'cb.view': 'Korpusning 3D ko‘rinishi',
+        uz: { 'b.cabinet': 'Korpus konstruktori', 'cb.title': 'Korpus konstruktori', 'cb.view': 'Korpusning 3D ko‘rinishi',
             'cb.hint': 'Aylantirish uchun suring; g‘ildirak yoki ikki barmoq bilan kattalashtiring. Ikki marta bosish — asl holat.',
             'cb.w': 'Eni', 'cb.h': 'Balandligi', 'cb.d': 'Chuqurligi', 'cb.t': 'Plita qalinligi', 'cb.plinth': 'Sokol',
             'cb.shelves': 'Seksiyada polkalar', 'cb.dividers': 'To‘siqlar', 'cb.doors': 'Eshiklar', 'cb.drawers': 'Tortmalar', 'cb.back': 'Orqa devor (DVP)',

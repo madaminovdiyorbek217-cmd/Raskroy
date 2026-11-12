@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '33';
+    var VERSION = '34';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -591,7 +591,7 @@
         });
     });
 
-    /* Конструктор корпуса с 3D-превью */
+    /* Конструктор корпуса */
     $('#rk-cabinet').addEventListener('click', function () {
         if (!window.RKCabinet) return;
         RKCabinet.open({
