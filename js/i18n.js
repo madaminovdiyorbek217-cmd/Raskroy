@@ -321,6 +321,7 @@
         plural: plural,
         all: all,
         lang: function () { return lang; },
+        setLang: setLang,
         /* числа: русский и узбекский форматируются с пробелом и запятой, английский с запятой и точкой */
         locale: function () { return lang === 'en' ? 'en-US' : 'ru-RU'; },
         decimal: function () { return lang === 'en' ? '.' : ','; }

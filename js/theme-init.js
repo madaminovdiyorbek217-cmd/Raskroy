@@ -188,15 +188,21 @@ if (window.top !== window.self) {
         return { c: c, tone: tone, img: img, theme: themeFor(tone, c) };
     }
 
-    /* Тёмный режим телефона: браузер сам «затемняет» светлые страницы и портит светлые фоны.
-       Светлая тема объявляет «только светлую» схему, тёмные темы — тёмную, тогда браузер ничего не инвертирует. */
+    /* Тёмный режим телефона: браузер сам «затемняет» светлые страницы, портит светлые фоны и сильно тормозит.
+       Страница объявляет, что сама умеет обе схемы (все цвета заданы явно), и браузер её не трогает. */
+    /* Слабые телефоны: без размытия и лишних теней (класс rk-lite) */
+    try {
+        var weak = (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+            (window.matchMedia && matchMedia('(pointer: coarse)').matches && (navigator.hardwareConcurrency || 8) <= 6);
+        if (weak) root.classList.add('rk-lite');
+    } catch (e) { /* не страшно */ }
     function setScheme() {
         try {
             var light = root.getAttribute('data-theme') === 'light';
             var m = document.querySelector('meta[name="color-scheme"]');
             if (!m) { m = document.createElement('meta'); m.name = 'color-scheme'; document.head.appendChild(m); }
-            m.setAttribute('content', light ? 'only light' : 'dark');
-            root.style.colorScheme = light ? 'only light' : 'dark';
+            m.setAttribute('content', light ? 'light dark' : 'dark');
+            root.style.colorScheme = light ? 'light dark' : 'dark';
         } catch (e) { /* не страшно */ }
     }
     function setMeta(c) { var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', c); }
@@ -254,4 +260,17 @@ if (window.top !== window.self) {
 
     window.RKLook = { scheme: setScheme, BG: BG, ACC: ACC, get: get, save: save, apply: apply, resolveBg: resolveBg, isHex: isHex, byId: byId };
     try { apply(get()); } catch (e) { /* без оформления сайт всё равно работает */ }
+})();
+
+/* Профили (js/auth.js): пока никто не вошёл, страницу закрывает экран входа. Класс ставится сразу, чтобы приложение не мелькнуло. */
+(function () {
+    try {
+        var k = '__rk_t'; localStorage.setItem(k, '1'); localStorage.removeItem(k);
+        var o = JSON.parse(localStorage.getItem('rk-users-v1') || 'null');
+        var list = o && Array.isArray(o.list) ? o.list : [];
+        var sid = null;
+        try { sid = sessionStorage.getItem('rk-session'); } catch (e1) { /* не страшно */ }
+        if (!sid) sid = localStorage.getItem('rk-session');
+        if (!list.some(function (u) { return u && u.id === sid; })) document.documentElement.classList.add('rk-locked');
+    } catch (e) { /* память закрыта: профили не работают, приложение открыто как раньше */ }
 })();

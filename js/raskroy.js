@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '36';
+    var VERSION = '38';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -103,7 +103,7 @@
     function loadProjects() {
         var out = null;
         try {
-            var raw = localStorage.getItem(PROJ_KEY);
+            var raw = window.RKAuth.get(PROJ_KEY);
             var o = raw && JSON.parse(raw);
             if (o && Array.isArray(o.list)) {
                 var list = [], folders = [], fids = {};
@@ -120,7 +120,7 @@
             }
             if (!out) {
                 /* первая загрузка после обновления: прежняя единственная работа становится первой вкладкой */
-                var old = localStorage.getItem(STORE_KEY);
+                var old = window.RKAuth.get(STORE_KEY);
                 var st2 = old && normalizeState(JSON.parse(old));
                 if (st2) out = { active: 'p1', folders: [], list: [{ id: 'p1', n: 1, name: '', f: '', state: st2 }] };
             }
@@ -147,7 +147,7 @@
         var sg = JSON.stringify(state);
         if (sigs[cur.id] !== undefined && sigs[cur.id] !== sg) cur.u = Date.now();
         sigs[cur.id] = sg;
-        try { localStorage.setItem(PROJ_KEY, JSON.stringify(projects)); } catch (e) { /* хранилище недоступно, это не страшно */ }
+        try { window.RKAuth.set(PROJ_KEY, JSON.stringify(projects)); } catch (e) { /* хранилище недоступно, это не страшно */ }
     }
     function save() {
         clearTimeout(saveTimer);
@@ -655,7 +655,8 @@
     var pool = [], workerFailed = false, reqId = 0, callbacks = {};
     var MAXW = Math.max(1, Math.min(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 2 : 3, (navigator.hardwareConcurrency || 2) - 1));
     function spawn() {
-        if (workerFailed || typeof Worker === 'undefined') return null;
+        if (typeof Worker === 'undefined') workerFailed = true;
+        if (workerFailed) return null;
         try {
             var w = new Worker('./js/raskroy-worker.js?v=' + VERSION);
             w.busy = 0;
@@ -678,9 +679,32 @@
     /* Очередь расчётов: задачи берутся по мере освобождения потоков, а устаревшие (пользователь уже поменял данные) выбрасываются,
        так что быстрый ввод не копит десятки ненужных расчётов и телефон не греется. */
     var queue = [];
+    /* пустой результат на случай, когда расчёт не удался (ошибка или слишком долго) — страница при этом не зависает */
+    function failedResult(cfg) {
+        var r;
+        try { r = window.Raskroy.optimize(Object.assign({}, cfg, { parts: [], timeMs: 10 })); } catch (e) { r = { sheets: [], unplaced: [], stats: { sheets: 0, util: 0, cuts: 0 } }; }
+        r.failed = true;
+        return r;
+    }
     function dispatch(job, w) {
-        var id = ++reqId;
-        callbacks[id] = function (res) { if (res) job.cb(res); else job.cb(syncSolve(job.cfg)); pump(); };
+        var id = ++reqId, done = false;
+        var limit = Math.max(12000, (job.cfg.timeMs || 400) * 15);
+        var timer = setTimeout(function () {
+            if (done) return;
+            done = true; delete callbacks[id];
+            /* расчёт завис: останавливаем этот поток, остальные продолжают работать */
+            try { w.terminate(); } catch (e) { /* не страшно */ }
+            pool = pool.filter(function (x) { return x !== w; });
+            job.cb(failedResult(job.cfg)); pump();
+        }, limit);
+        callbacks[id] = function (res, err) {
+            if (done) return;
+            done = true; clearTimeout(timer);
+            if (res) job.cb(res);
+            else if (err === 'worker') job.cb(safeSync(job.cfg));
+            else job.cb(failedResult(job.cfg));
+            pump();
+        };
         w.busy++;
         w.postMessage({ id: id, cfg: job.cfg });
     }
@@ -701,9 +725,10 @@
             dispatch(job, w);
         }
     }
-    function fallback(job) { setTimeout(function () { job.cb(syncSolve(job.cfg)); pump(); }, 0); }
+    function fallback(job) { setTimeout(function () { job.cb(safeSync(job.cfg)); pump(); }, 0); }
     function solve(cfg, cb, alive) { queue.push({ cfg: cfg, cb: cb, alive: alive }); pump(); }
     function syncSolve(cfg) { return window.Raskroy.optimize(cfg); }
+    function safeSync(cfg) { try { return syncSolve(cfg); } catch (e) { return failedResult(cfg); } }
 
 
     /* ---------- Авто подбор: несколько вариантов, остаётся лучший ---------- */
@@ -724,9 +749,9 @@
     function solveJob(j, cb, alive) {
         var cfg = j.cfg;
         if (!cfg.auto) { solve(cfg, cb, alive); return; }
-        var n = AUTO_VARIANTS.length, got = new Array(n), left = n;
+        var n = workerFailed ? 3 : AUTO_VARIANTS.length, got = new Array(n), left = n;
         var per = Math.max(200, Math.round(cfg.timeMs * 0.6));
-        AUTO_VARIANTS.forEach(function (v, i) {
+        AUTO_VARIANTS.slice(0, n).forEach(function (v, i) {
             solve(Object.assign({}, cfg, { dir: v.dir, seed: v.seed, timeMs: per }), function (res) {
                 got[i] = res;
                 if (--left) return;
@@ -904,6 +929,7 @@
     /* ---------- Вывод результата ---------- */
     var uniqCounter = 0;
     function autoNote(res) {
+        if (res.failed) return '<p class="rk-auto-note rk-auto-note--bad"><span>' + esc(t('am.fail')) + '</span></p>';
         var a = res.auto;
         if (!a) return '';
         var txt = t('am.res', { n: a.tried, dir: t('am.d.' + a.dir), v: a.variant + 1 });

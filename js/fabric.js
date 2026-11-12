@@ -52,7 +52,7 @@
     }
     function load() {
         try {
-            var raw = JSON.parse(localStorage.getItem(KEY) || 'null');
+            var raw = JSON.parse(window.RKAuth.get(KEY) || 'null');
             if (raw && Array.isArray(raw.list) && raw.list.length) {
                 var list = [], i = 0;
                 raw.list.forEach(function (x) { var f = cleanFabric(x, ++i); if (f) list.push(f); });
@@ -73,7 +73,7 @@
     var saveTimer = 0;
     function saveNow() {
         clearTimeout(saveTimer);
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* хранилище недоступно */ }
+        try { window.RKAuth.set(KEY, JSON.stringify(state)); } catch (e) { /* хранилище недоступно */ }
     }
     function save() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
     window.addEventListener('pagehide', saveNow);

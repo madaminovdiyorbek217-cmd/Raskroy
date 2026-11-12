@@ -3,14 +3,14 @@
    Новая версия ставится в фоне и включается, когда пользователь нажмёт «Обновить». */
 'use strict';
 
-var VERSION = '36';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
+var VERSION = '38';   /* меняйте вместе с ?v=… в index.html и VERSION в js/raskroy.js */
 var CACHE = 'raskroy-v' + VERSION;
 var V = '?v=' + VERSION;
 
 var ASSETS = [
     './', './index.html', './manifest.webmanifest',
     './css/reset.css' + V, './css/style.css' + V,
-    './js/theme-init.js' + V, './js/ui.js' + V, './js/i18n.js' + V,
+    './js/theme-init.js' + V, './js/auth.js' + V, './js/ui.js' + V, './js/i18n.js' + V,
     './js/raskroy-core.js' + V, './js/raskroy.js' + V, './js/app.js' + V, './js/raskroy-worker.js' + V,
     './js/export.js' + V, './js/export-i18n.js' + V, './js/select.js' + V, './js/smartpaste.js' + V, './js/photos.js' + V, './js/dialog.js' + V, './js/colorpick.js' + V, './js/fold.js' + V, './js/fabric-i18n.js' + V, './js/look-i18n.js' + V, './js/look.js' + V, './js/fabric-core.js' + V, './js/fabric.js' + V,
     './fonts/inter-400.woff', './fonts/inter-500.woff', './fonts/inter-600.woff', './fonts/inter-700.woff',

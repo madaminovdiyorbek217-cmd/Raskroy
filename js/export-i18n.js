@@ -209,3 +209,83 @@
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
 
+
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: { 'am.fail': 'Не удалось рассчитать этот материал (слишком долго или ошибка). Проверьте размеры деталей и листа.' },
+        en: { 'am.fail': 'Could not calculate this material (too long or an error). Check the part and sheet sizes.' },
+        uz: { 'am.fail': 'Bu material hisoblanmadi (juda uzoq yoki xatolik). Detal va varaq o‘lchamlarini tekshiring.' }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();
+
+/* Профили: логин и пароль */
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: {
+            'au.btn': 'Профиль', 'au.show': 'Показать', 'au.hide': 'Скрыть',
+            'au.title.new': 'Создайте профиль', 'au.sub.new': 'Придумайте логин и пароль. У каждого профиля свои работы: войдёте под другим логином — увидите другие.',
+            'au.title.add': 'Новый профиль', 'au.sub.add': 'У нового профиля будут свои работы, сначала пустые.',
+            'au.title.in': 'Вход', 'au.sub.in': 'Введите логин и пароль своего профиля.',
+            'au.title.pw': 'Смена пароля', 'au.sub.pw': 'Введите текущий пароль и придумайте новый.',
+            'au.title.del': 'Удалить профиль', 'au.sub.del': 'Профиль «{n}» и все его работы будут удалены с этого устройства. Сначала сделайте резервную копию, если работы нужны. Для подтверждения введите пароль.',
+            'au.login': 'Логин', 'au.pass': 'Пароль', 'au.pass2': 'Повторите пароль', 'au.pass.old': 'Текущий пароль', 'au.pass.new': 'Новый пароль',
+            'au.stay': 'Оставаться в системе',
+            'au.btn.reg': 'Создать профиль', 'au.btn.in': 'Войти', 'au.btn.pw': 'Сменить пароль', 'au.btn.del': 'Удалить навсегда',
+            'au.to.new': 'Создать новый профиль', 'au.to.in': 'У меня уже есть профиль',
+            'au.note': 'Профиль хранится только на этом устройстве. Чтобы перенести работы на другое устройство, сделайте резервную копию и загрузите её там.',
+            'au.mig': 'Ваши прежние работы с этого устройства будут перенесены в этот профиль.',
+            'au.e.login': 'Логин: от 2 до 30 символов', 'au.e.pass': 'Пароль: минимум 4 символа', 'au.e.same': 'Пароли не совпадают',
+            'au.e.exists': 'Такой логин уже есть', 'au.e.bad': 'Неверный логин или пароль', 'au.e.old': 'Неверный пароль',
+            'au.e.nocrypto': 'Браузер не поддерживает защищённое хранение пароля. Откройте сайт по адресу https.',
+            'au.e.store': 'Не удалось сохранить: память браузера недоступна или заполнена',
+            'au.m.works': 'Работ: {n}', 'au.m.profiles': 'Другие профили', 'au.m.add': 'Добавить профиль', 'au.m.backup': 'Резервная копия работ',
+            'au.m.pw': 'Сменить пароль', 'au.m.out': 'Выйти', 'au.m.del': 'Удалить профиль', 'au.toast.pw': 'Пароль изменён'
+        },
+        en: {
+            'au.btn': 'Profile', 'au.show': 'Show', 'au.hide': 'Hide',
+            'au.title.new': 'Create a profile', 'au.sub.new': 'Choose a login and a password. Every profile keeps its own jobs: sign in under another login to see other ones.',
+            'au.title.add': 'New profile', 'au.sub.add': 'The new profile has its own jobs, empty at first.',
+            'au.title.in': 'Sign in', 'au.sub.in': 'Enter the login and password of your profile.',
+            'au.title.pw': 'Change password', 'au.sub.pw': 'Enter the current password and choose a new one.',
+            'au.title.del': 'Delete profile', 'au.sub.del': 'Profile “{n}” and all its jobs will be deleted from this device. Make a backup first if you need them. Enter the password to confirm.',
+            'au.login': 'Login', 'au.pass': 'Password', 'au.pass2': 'Repeat password', 'au.pass.old': 'Current password', 'au.pass.new': 'New password',
+            'au.stay': 'Stay signed in',
+            'au.btn.reg': 'Create profile', 'au.btn.in': 'Sign in', 'au.btn.pw': 'Change password', 'au.btn.del': 'Delete forever',
+            'au.to.new': 'Create a new profile', 'au.to.in': 'I already have a profile',
+            'au.note': 'The profile is stored on this device only. To move jobs to another device, make a backup and load it there.',
+            'au.mig': 'Your earlier jobs from this device will be moved into this profile.',
+            'au.e.login': 'Login: 2 to 30 characters', 'au.e.pass': 'Password: at least 4 characters', 'au.e.same': 'Passwords do not match',
+            'au.e.exists': 'This login is taken', 'au.e.bad': 'Wrong login or password', 'au.e.old': 'Wrong password',
+            'au.e.nocrypto': 'This browser cannot store the password securely. Open the site over https.',
+            'au.e.store': 'Could not save: browser storage is unavailable or full',
+            'au.m.works': 'Jobs: {n}', 'au.m.profiles': 'Other profiles', 'au.m.add': 'Add profile', 'au.m.backup': 'Backup of jobs',
+            'au.m.pw': 'Change password', 'au.m.out': 'Sign out', 'au.m.del': 'Delete profile', 'au.toast.pw': 'Password changed'
+        },
+        uz: {
+            'au.btn': 'Profil', 'au.show': 'Ko‘rsatish', 'au.hide': 'Yashirish',
+            'au.title.new': 'Profil yarating', 'au.sub.new': 'Login va parol o‘ylab toping. Har bir profilning o‘z ishlari bor: boshqa login bilan kirsangiz, boshqa ishlarni ko‘rasiz.',
+            'au.title.add': 'Yangi profil', 'au.sub.add': 'Yangi profilning o‘z ishlari bo‘ladi, avval bo‘sh.',
+            'au.title.in': 'Kirish', 'au.sub.in': 'Profilingizning login va parolini kiriting.',
+            'au.title.pw': 'Parolni almashtirish', 'au.sub.pw': 'Joriy parolni kiriting va yangisini o‘ylab toping.',
+            'au.title.del': 'Profilni o‘chirish', 'au.sub.del': '«{n}» profili va uning barcha ishlari bu qurilmadan o‘chiriladi. Ishlar kerak bo‘lsa, avval zaxira nusxa oling. Tasdiqlash uchun parolni kiriting.',
+            'au.login': 'Login', 'au.pass': 'Parol', 'au.pass2': 'Parolni takrorlang', 'au.pass.old': 'Joriy parol', 'au.pass.new': 'Yangi parol',
+            'au.stay': 'Tizimda qolish',
+            'au.btn.reg': 'Profil yaratish', 'au.btn.in': 'Kirish', 'au.btn.pw': 'Parolni almashtirish', 'au.btn.del': 'Butunlay o‘chirish',
+            'au.to.new': 'Yangi profil yaratish', 'au.to.in': 'Menda profil bor',
+            'au.note': 'Profil faqat shu qurilmada saqlanadi. Ishlarni boshqa qurilmaga o‘tkazish uchun zaxira nusxa oling va u yerda yuklang.',
+            'au.mig': 'Shu qurilmadagi avvalgi ishlaringiz bu profilga ko‘chiriladi.',
+            'au.e.login': 'Login: 2 dan 30 gacha belgi', 'au.e.pass': 'Parol: kamida 4 belgi', 'au.e.same': 'Parollar mos kelmadi',
+            'au.e.exists': 'Bunday login band', 'au.e.bad': 'Login yoki parol noto‘g‘ri', 'au.e.old': 'Parol noto‘g‘ri',
+            'au.e.nocrypto': 'Brauzer parolni xavfsiz saqlay olmaydi. Saytni https orqali oching.',
+            'au.e.store': 'Saqlab bo‘lmadi: brauzer xotirasi mavjud emas yoki to‘lgan',
+            'au.m.works': 'Ishlar: {n}', 'au.m.profiles': 'Boshqa profillar', 'au.m.add': 'Profil qo‘shish', 'au.m.backup': 'Ishlarning zaxira nusxasi',
+            'au.m.pw': 'Parolni almashtirish', 'au.m.out': 'Chiqish', 'au.m.del': 'Profilni o‘chirish', 'au.toast.pw': 'Parol almashtirildi'
+        }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=36">
-    <link rel="stylesheet" href="./css/style.css?v=36">
+    <link rel="stylesheet" href="./css/reset.css?v=38">
+    <link rel="stylesheet" href="./css/style.css?v=38">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,7 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=36"></script>
+    <script src="./js/theme-init.js?v=38"></script>
 </head>
 
 <body class="rk-page">
@@ -49,6 +49,7 @@
             </div>
             <button type="button" class="lk-open" data-look-open aria-haspopup="dialog" aria-controls="lk" aria-label="Оформление" title="Оформление" data-i18n-attr="aria-label:lk.title;title:lk.title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10" cy="7" r="1.1"/><circle cx="14.5" cy="7" r="1.1"/></svg></button>
             <button type="button" class="rk-install" data-install hidden title="Установить приложение" data-i18n-attr="title:app.install"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="app.install">Установить приложение</span></button>
+            <button type="button" class="au-btn" data-au-open hidden aria-haspopup="menu" aria-expanded="false" aria-label="Профиль" title="Профиль" data-i18n-attr="aria-label:au.btn;title:au.btn"><span class="au-av" data-au-av aria-hidden="true">?</span></button>
         </div>
     </header>
 
@@ -342,6 +343,7 @@
         <button type="button" class="isl-btn" title="Настройки" data-i18n-attr="title:nav.set" id="isl-set" aria-expanded="false" aria-controls="isl-pop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h9M19 18h1"/><circle cx="16" cy="6" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/></svg><span data-i18n="nav.set">Настройки</span></button>
     </nav>
     <div class="isl-pop" id="isl-pop" hidden>
+        <button type="button" class="rk-btn au-row" data-au-open hidden aria-haspopup="menu" aria-expanded="false"><span class="au-av au-av--sm" data-au-av aria-hidden="true">?</span><span class="au-rowname" data-au-name></span></button>
         <button type="button" class="rk-install rk-install--pop" data-install hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span data-i18n="app.install">Установить приложение</span></button>
         <div class="lang-switch" role="radiogroup" aria-label="Язык" data-i18n-attr="aria-label:lang.aria">
             <button type="button" role="radio" data-lang-set="ru" aria-checked="false" title="Русский" lang="ru">RU</button>
@@ -393,24 +395,25 @@
         </div>
     </footer>
 
-    <script src="./js/ui.js?v=36" defer></script>
-    <script src="./js/fabric-i18n.js?v=36" defer></script>
-    <script src="./js/look-i18n.js?v=36" defer></script>
-    <script src="./js/export-i18n.js?v=36" defer></script>
-    <script src="./js/dialog.js?v=36" defer></script>
-    <script src="./js/colorpick.js?v=36" defer></script>
-    <script src="./js/fold.js?v=36" defer></script>
-    <script src="./js/i18n.js?v=36" defer></script>
-    <script src="./js/export.js?v=36" defer></script>
-    <script src="./js/select.js?v=36" defer></script>
-    <script src="./js/smartpaste.js?v=36" defer></script>
-    <script src="./js/photos.js?v=36" defer></script>
-    <script src="./js/raskroy-core.js?v=36" defer></script>
-    <script src="./js/raskroy.js?v=36" defer></script>
-    <script src="./js/fabric-core.js?v=36" defer></script>
-    <script src="./js/fabric.js?v=36" defer></script>
-    <script src="./js/look.js?v=36" defer></script>
-    <script src="./js/app.js?v=36" defer></script>
+    <script src="./js/auth.js?v=38" defer></script>
+    <script src="./js/ui.js?v=38" defer></script>
+    <script src="./js/fabric-i18n.js?v=38" defer></script>
+    <script src="./js/look-i18n.js?v=38" defer></script>
+    <script src="./js/export-i18n.js?v=38" defer></script>
+    <script src="./js/dialog.js?v=38" defer></script>
+    <script src="./js/colorpick.js?v=38" defer></script>
+    <script src="./js/fold.js?v=38" defer></script>
+    <script src="./js/i18n.js?v=38" defer></script>
+    <script src="./js/export.js?v=38" defer></script>
+    <script src="./js/select.js?v=38" defer></script>
+    <script src="./js/smartpaste.js?v=38" defer></script>
+    <script src="./js/photos.js?v=38" defer></script>
+    <script src="./js/raskroy-core.js?v=38" defer></script>
+    <script src="./js/raskroy.js?v=38" defer></script>
+    <script src="./js/fabric-core.js?v=38" defer></script>
+    <script src="./js/fabric.js?v=38" defer></script>
+    <script src="./js/look.js?v=38" defer></script>
+    <script src="./js/app.js?v=38" defer></script>
 </body>
 
 </html>
