@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '34';
+    var VERSION = '36';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -591,32 +591,6 @@
         });
     });
 
-    /* Конструктор корпуса */
-    $('#rk-cabinet').addEventListener('click', function () {
-        if (!window.RKCabinet) return;
-        RKCabinet.open({
-            materials: state.materials,
-            onAdd: function (parts, bodyId, backId) {
-                if (backId === '__hdf__') {
-                    var hm = newMat(PRESETS['hdf-2800']);
-                    state.materials.push(hm); backId = hm.id;
-                }
-                var ids = {}; state.materials.forEach(function (m) { ids[m.id] = 1; });
-                if (!ids[bodyId]) bodyId = state.materials[0].id;
-                if (!ids[backId]) backId = bodyId;
-                var pcs = 0;
-                parts.forEach(function (x) {
-                    state.parts.push({ name: x.name, mat: x.back ? backId : bodyId, l: x.l, w: x.w, qty: x.qty, rotate: x.rotate, e: x.e.slice() });
-                    pcs += x.qty;
-                });
-                renderAll(); changed(true);
-                toast(t('cb.added', { n: parts.length, p: pcs }));
-                var hd = document.getElementById('rk-h-parts');
-                if (hd) hd.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
-
     /* Разбор строки «название 2200 550 2» (числа: длина, ширина, штук) */
     function parseLine(line) {
         line = String(line).trim();
@@ -679,7 +653,7 @@
 
     /* ---------- Расчёт ---------- */
     var pool = [], workerFailed = false, reqId = 0, callbacks = {};
-    var MAXW = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1));
+    var MAXW = Math.max(1, Math.min(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 2 : 3, (navigator.hardwareConcurrency || 2) - 1));
     function spawn() {
         if (workerFailed || typeof Worker === 'undefined') return null;
         try {
@@ -701,24 +675,34 @@
             return w;
         } catch (err) { workerFailed = true; return null; }
     }
-    function getWorker() {
-        if (workerFailed) return null;
-        var free = null;
-        pool.forEach(function (w) { if (!free || w.busy < free.busy) free = w; });
-        if (free && free.busy === 0) return free;
-        if (pool.length < MAXW) { var n = spawn(); if (n) return n; }
-        return free || spawn();
+    /* Очередь расчётов: задачи берутся по мере освобождения потоков, а устаревшие (пользователь уже поменял данные) выбрасываются,
+       так что быстрый ввод не копит десятки ненужных расчётов и телефон не греется. */
+    var queue = [];
+    function dispatch(job, w) {
+        var id = ++reqId;
+        callbacks[id] = function (res) { if (res) job.cb(res); else job.cb(syncSolve(job.cfg)); pump(); };
+        w.busy++;
+        w.postMessage({ id: id, cfg: job.cfg });
     }
-    function solve(cfg, cb) {
-        var w = getWorker();
-        if (w) {
-            var id = ++reqId; callbacks[id] = function (res, err) {
-                if (res) cb(res); else cb(syncSolve(cfg));
-            };
-            w.busy++;
-            w.postMessage({ id: id, cfg: cfg });
-        } else cb(syncSolve(cfg));
+    function pump() {
+        while (queue.length) {
+            var job = queue[0];
+            if (job.alive && !job.alive()) { queue.shift(); continue; }
+            var w = null;
+            if (!workerFailed) {
+                pool.forEach(function (x) { if (!w && x.busy === 0) w = x; });
+                if (!w && pool.length < MAXW) w = spawn();
+            }
+            if (!w) {
+                if (workerFailed) { queue.shift(); fallback(job); }
+                return;
+            }
+            queue.shift();
+            dispatch(job, w);
+        }
     }
+    function fallback(job) { setTimeout(function () { job.cb(syncSolve(job.cfg)); pump(); }, 0); }
+    function solve(cfg, cb, alive) { queue.push({ cfg: cfg, cb: cb, alive: alive }); pump(); }
     function syncSolve(cfg) { return window.Raskroy.optimize(cfg); }
 
 
@@ -737,9 +721,9 @@
     function resScore(res) {
         return res.unplaced.length * 1e16 + res.stats.sheets * 1e13 - maxFreeArea(res) + res.stats.cuts * 0.01;
     }
-    function solveJob(j, cb) {
+    function solveJob(j, cb, alive) {
         var cfg = j.cfg;
-        if (!cfg.auto) { solve(cfg, cb); return; }
+        if (!cfg.auto) { solve(cfg, cb, alive); return; }
         var n = AUTO_VARIANTS.length, got = new Array(n), left = n;
         var per = Math.max(200, Math.round(cfg.timeMs * 0.6));
         AUTO_VARIANTS.forEach(function (v, i) {
@@ -757,7 +741,7 @@
                     worstSheets: got[worst].stats.sheets, worstUtil: got[worst].stats.util, bestSheets: res.stats.sheets, bestUtil: res.stats.util
                 };
                 cb(res);
-            });
+            }, alive);
         });
     }
 
@@ -802,7 +786,7 @@
                 if (token !== runToken) return;
                 out[idx] = { mat: j.mat, res: res, cfg: j.cfg };
                 if (--left === 0) { lastResult = out; lastResultSig = sigAtRun; renderResults(out); }
-            });
+            }, function () { return token === runToken; });
         });
     }
 
@@ -1017,7 +1001,10 @@
     /* подсветка: наведите на деталь на карте или строку в списке, остальные приглушатся */
     (function () {
         var out = $('#rk-out');
+        var lastMark = null, canHover = !(window.matchMedia && matchMedia('(hover: none)').matches);
         function mark(id) {
+            if (!canHover || id === lastMark) return;
+            lastMark = id;
             $$('.rk-pc, .rk-legend tbody tr', out).forEach(function (n) {
                 n.classList.toggle('is-dim', id !== null && n.getAttribute('data-id') !== id);
             });
