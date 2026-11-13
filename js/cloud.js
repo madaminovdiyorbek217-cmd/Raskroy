@@ -160,5 +160,37 @@
     RKCloud.setBlocked = function (id, block, why) {
         return api('POST', '/rest/v1/rpc/admin_set_blocked', { target: id, do_block: !!block, why: why || null });
     };
+
+    /* ---------- Captcha Sentinel ---------- */
+
+    RKCloud.requestCaptcha = function () {
+        return token().then(function (tk) {
+            return http(
+                'POST',
+                '/functions/v1/capcha-sentinel',
+                {},
+                { Authorization: 'Bearer ' + tk }
+            );
+        }).then(function (r) {
+            if (!r.ok || !r.json || !r.json.ok) {
+                throw err('captcha', {
+                    message: r.json && r.json.error
+                });
+            }
+            return r.json;
+        });
+    };
+
+    RKCloud.captchaApproved = function () {
+        return api(
+            'POST',
+            '/rest/v1/rpc/captcha_session_approved',
+            {}
+        ).then(function (result) {
+            return result === true;
+        });
+    };
+
+
     RKCloud.loginKey = loginKey;
 })();

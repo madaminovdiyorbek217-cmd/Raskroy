@@ -20,7 +20,7 @@
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
     <link rel="stylesheet" href="./css/reset.css?v=39">
-    <link rel="stylesheet" href="./css/style.css?v=39">
+    <link rel="stylesheet" href="./css/style.css?v=sentinel-20261113153437">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -396,8 +396,10 @@
         </div>
     </footer>
 
+    <!-- Captcha Sentinel -->
+    
     <script src="./js/cloud.js?v=39" defer></script>
-    <script src="./js/auth.js?v=39" defer></script>
+    <script src="./js/auth.js?v=sentinel-20261113153437" defer></script>
     <script src="./js/ui.js?v=39" defer></script>
     <script src="./js/fabric-i18n.js?v=39" defer></script>
     <script src="./js/look-i18n.js?v=39" defer></script>
@@ -417,6 +419,88 @@
     <script src="./js/fabric.js?v=39" defer></script>
     <script src="./js/look.js?v=39" defer></script>
     <script src="./js/app.js?v=39" defer></script>
+<!-- CAPTCHA SENTINEL -->
+<div id="cs-captcha"
+     class="cs-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="cs-title"
+     aria-describedby="cs-description"
+     hidden>
+
+    <section class="cs-card">
+
+        <div class="cs-icon">
+            <svg viewBox="0 0 24 24"
+                 width="42"
+                 height="42"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 stroke-linecap="round"
+                 stroke-linejoin="round"
+                 aria-hidden="true">
+                <path d="M12 2 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6z"/>
+                <path d="m8 12 3 3 5-6"/>
+            </svg>
+        </div>
+
+        <div class="cs-eyebrow">
+            ЗАЩИТА АККАУНТА
+        </div>
+
+        <h2 id="cs-title">
+            Captcha Sentinel
+        </h2>
+
+        <p id="cs-description" class="cs-description">
+            Подтверди вход через Telegram,
+            чтобы продолжить работу в Raskroy.
+        </p>
+
+        <div class="cs-status-box">
+            <span class="cs-spinner"
+                  aria-hidden="true"></span>
+
+            <span id="cs-status" role="status"
+                  aria-live="polite">
+                Ожидаем подтверждение...
+            </span>
+        </div>
+
+        <div class="cs-timer-header">
+            <span>Осталось времени</span>
+
+            <strong id="cs-seconds">
+                60 сек
+            </strong>
+        </div>
+
+        <div class="cs-progress"
+             id="cs-progress"
+             role="progressbar"
+             aria-label="Время подтверждения"
+             aria-valuemin="0"
+             aria-valuemax="60"
+             aria-valuenow="60">
+
+            <div id="cs-progress-bar"></div>
+        </div>
+
+        <button id="cs-cancel"
+                class="cs-cancel"
+                type="button">
+            Отменить вход
+        </button>
+
+        <p class="cs-footer">
+            Никогда не подтверждай запрос,
+            если вход выполняешь не ты.
+        </p>
+
+    </section>
+</div>
+<!-- /CAPTCHA SENTINEL -->
 </body>
 
 </html>

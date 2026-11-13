@@ -19,6 +19,7 @@
     var CLOUD = !!(window.RKCloud && window.RKCloud.on);
     var MINPW = CLOUD ? 6 : 4;
     var frozen = false, cur = null, fails = 0, gate = false;
+    var pendingAdmin = null;
     var booting = false;     /* облако: идёт стартовая сверка; сохранения самого приложения при запуске правками не считаются */
 
     function storageOK() {
@@ -59,6 +60,10 @@
             cur = readMe();
             /* «не оставаться в системе»: вход действует, пока открыта вкладка */
             try { if (cur && localStorage.getItem(STK) === '0' && !sessionStorage.getItem('rk-cloud-alive')) cur = null; } catch (e) { /* не страшно */ }
+            if (cur && cur.id === '77dbb716-75de-4937-80f1-ff01899a1f76') {
+                pendingAdmin = cur;
+                cur = null;
+            }
             booting = !!cur;
         } else { var sid0 = getSid(); cur = users.filter(function (u) { return u.id === sid0; })[0] || null; }
     }
@@ -407,9 +412,203 @@
         if (String(pw).length < MINPW) return rej('pass');
         return RKCloud.signUp(login, pw).then(function () { return afterAuth(true, stay); });
     }
+
+    /* Вход с подтверждением Captcha Sentinel */
+    function captchaWait(request) {
+        var modal = document.getElementById('cs-captcha');
+        var seconds = document.getElementById('cs-seconds');
+        var progress = document.getElementById('cs-progress');
+        var bar = document.getElementById('cs-progress-bar');
+        var cancel = document.getElementById('cs-cancel');
+        var status = document.getElementById('cs-status');
+
+        if (!modal || !seconds || !progress ||
+            !bar || !cancel || !status) {
+            return Promise.reject({
+                code: 'captcha',
+                message: 'Окно Captcha Sentinel не найдено'
+            });
+        }
+
+        var expires = Date.parse(
+            request && request.expires_at
+        );
+
+        if (!isFinite(expires)) {
+            expires = Date.now() + 60000;
+        }
+
+        var duration = Math.max(
+            1,
+            Math.ceil((expires - Date.now()) / 1000)
+        );
+
+        return new Promise(function (resolve, reject) {
+            var finished = false;
+            var polling = null;
+            var clock = null;
+
+            function cleanup() {
+                if (polling !== null) {
+                    clearTimeout(polling);
+                }
+
+                if (clock !== null) {
+                    clearInterval(clock);
+                }
+
+                cancel.removeEventListener(
+                    'click',
+                    onCancel
+                );
+
+                modal.hidden = true;
+                modal.classList.remove('cs-urgent');
+            }
+
+            function finish(ok, value) {
+                if (finished) return;
+
+                finished = true;
+                cleanup();
+
+                if (ok) {
+                    resolve(value);
+                } else {
+                    reject(value);
+                }
+            }
+
+            function onCancel() {
+                finish(false, {
+                    code: 'captcha',
+                    message: 'Вход отменён пользователем'
+                });
+            }
+
+            function tick() {
+                if (finished) return;
+
+                var remaining = Math.max(
+                    0,
+                    Math.ceil(
+                        (expires - Date.now()) / 1000
+                    )
+                );
+
+                seconds.textContent =
+                    remaining + ' сек';
+
+                progress.setAttribute(
+                    'aria-valuemax',
+                    String(duration)
+                );
+
+                progress.setAttribute(
+                    'aria-valuenow',
+                    String(remaining)
+                );
+
+                bar.style.width =
+                    (remaining / duration * 100) + '%';
+
+                modal.classList.toggle(
+                    'cs-urgent',
+                    remaining <= 15
+                );
+
+                if (remaining <= 0) {
+                    finish(false, {
+                        code: 'captcha',
+                        message:
+                            'Время подтверждения истекло'
+                    });
+                }
+            }
+
+            function poll() {
+                if (finished) return;
+
+                RKCloud.captchaApproved()
+                    .then(function (approved) {
+                        if (finished) return;
+
+                        if (approved) {
+                            status.textContent =
+                                'Вход подтверждён';
+
+                            finish(true, true);
+                            return;
+                        }
+
+                        polling = setTimeout(
+                            poll,
+                            1500
+                        );
+                    })
+                    .catch(function (error) {
+                        if (!finished) {
+                            finish(false, error);
+                        }
+                    });
+            }
+
+            cancel.disabled = false;
+
+            cancel.addEventListener(
+                'click',
+                onCancel
+            );
+
+            modal.classList.remove('cs-urgent');
+            modal.hidden = false;
+
+            status.textContent =
+                'Ожидаем подтверждение в Telegram...';
+
+            tick();
+
+            if (!finished) {
+                clock = setInterval(tick, 250);
+
+                polling = setTimeout(
+                    poll,
+                    1000
+                );
+            }
+        });
+    }
     function cloudSignIn(name, pw, stay) {
         if (!cleanLogin(name)) return rej('bad');
-        return RKCloud.signIn(name, pw).then(function () { return afterAuth(false, stay); });
+
+        var ADMIN_ID =
+            '77dbb716-75de-4937-80f1-ff01899a1f76';
+
+        return RKCloud.signIn(name, pw).then(function (uid) {
+            if (uid !== ADMIN_ID) {
+                return afterAuth(false, stay);
+            }
+
+            return RKCloud.captchaApproved().then(function (ok) {
+                if (ok) return afterAuth(false, stay);
+
+                return RKCloud.requestCaptcha().then(
+                    function (request) {
+                        return captchaWait(request).then(
+                            function () {
+                                return afterAuth(false, stay);
+                            }
+                        );
+                    }
+                );
+            });
+        }).catch(function (e) {
+            return Promise.resolve().then(function () {
+                return RKCloud.signOut();
+            }).catch(noop).then(function () {
+                throw e;
+            });
+        });
     }
     function cloudChangePw(oldPw, newPw) {
         if (!cur) return rej('bad');
@@ -524,7 +723,7 @@
     function initial(s) { return (Array.from(String(s || '?'))[0] || '?').toUpperCase(); }
     function hueOf(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; }
     var GRADS = [['#6366f1', '#8b5cf6'], ['#0ea5e9', '#22d3ee'], ['#10b981', '#84cc16'], ['#f59e0b', '#ef4444'], ['#ec4899', '#f43f5e'], ['#14b8a6', '#3b82f6'],
-        ['#a855f7', '#ec4899'], ['#64748b', '#0f172a'], ['#f97316', '#facc15'], ['#22c55e', '#06b6d4'], ['#e11d48', '#7c3aed'], ['#78350f', '#d97706']];
+    ['#a855f7', '#ec4899'], ['#64748b', '#0f172a'], ['#f97316', '#facc15'], ['#22c55e', '#06b6d4'], ['#e11d48', '#7c3aed'], ['#78350f', '#d97706']];
     var RINGS = ['none', 'solid', 'grad', 'dash', 'glow', 'rainbow'];
     /* Рисует аватарку в узле: фото, эмодзи или первая буква логина на градиенте; рамка задаётся атрибутом data-ring */
     function paintAv(node, login, look) {
@@ -670,7 +869,7 @@
             form.appendChild(btns);
 
             function fail(code, input, reason) {
-                err.textContent = t(ERR[code] || 'au.e.store') + (code === 'blocked' && reason ? ' ' + t('au.blocked.reason', { n: reason }) : '');
+                err.textContent = code === 'captcha' ? (reason || 'Подтверждение Telegram не получено') : t(ERR[code] || 'au.e.store') + (code === 'blocked' && reason ? ' ' + t('au.blocked.reason', { n: reason }) : '');
                 busy = false; go.disabled = false; go.textContent = t('au.btn.' + mode);
                 if (input) { input.classList.add('is-bad'); try { input.focus(); } catch (e) { /* не страшно */ } }
             }
@@ -702,7 +901,7 @@
                     if (CLOUD && (mode === 'in' || mode === 'reg')) { frozen = true; location.reload(); return; }
                     reload();
                 }, function (er) {
-                    fail(er && er.code, mode === 'pw' && er && er.code === 'old' ? form.elements.old : (mode === 'in' || mode === 'del' || mode === 'imp' ? pw1.inp : null), er && er.reason);
+                    fail(er && er.code, mode === 'pw' && er && er.code === 'old' ? form.elements.old : (mode === 'in' || mode === 'del' || mode === 'imp' ? pw1.inp : null), er && (er.reason || er.message));
                 });
             });
             card.appendChild(form);
@@ -896,5 +1095,36 @@
         window.addEventListener('online', function () { softSync(true); });
     }
     /* все скрипты страницы уже выполнились (в том числе переводы), когда наступает DOMContentLoaded */
-    if (document.readyState === 'complete') start(); else document.addEventListener('DOMContentLoaded', start);
+    function verifiedStart() {
+        if (!CLOUD || !pendingAdmin) {
+            start();
+            return;
+        }
+
+        document.documentElement.classList.add('rk-locked');
+
+        RKCloud.captchaApproved().then(function (approved) {
+            if (approved) {
+                cur = pendingAdmin;
+                pendingAdmin = null;
+                booting = true;
+            } else {
+                pendingAdmin = null;
+                booting = false;
+                try { localStorage.removeItem(MEK); } catch (e) { noop(); }
+            }
+            start();
+        }).catch(function () {
+            pendingAdmin = null;
+            booting = false;
+            try { localStorage.removeItem(MEK); } catch (e) { noop(); }
+            start();
+        });
+    }
+
+    if (document.readyState === 'complete') {
+        verifiedStart();
+    } else {
+        document.addEventListener('DOMContentLoaded', verifiedStart);
+    }
 })();
