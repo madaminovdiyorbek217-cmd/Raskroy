@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob: data: https://*.supabase.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн-раскрой плитных материалов</title>
     <meta name="description" content="Бесплатный онлайн-раскрой ЛДСП, МДФ и фанеры: карты раскроя, расчёт листов, кромки и длины реза. Работает в браузере, данные остаются у вас." data-i18n-attr="content:meta.desc">
@@ -19,8 +19,8 @@
 
     <link rel="preload" href="./fonts/inter-400.woff" as="font" type="font/woff" crossorigin>
 
-    <link rel="stylesheet" href="./css/reset.css?v=38">
-    <link rel="stylesheet" href="./css/style.css?v=38">
+    <link rel="stylesheet" href="./css/reset.css?v=39">
+    <link rel="stylesheet" href="./css/style.css?v=39">
 
     <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -32,7 +32,8 @@
     <meta name="apple-mobile-web-app-title" content="Раскрой">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="./js/theme-init.js?v=38"></script>
+    <script src="./js/cloud-config.js?v=39"></script>
+    <script src="./js/theme-init.js?v=39"></script>
 </head>
 
 <body class="rk-page">
@@ -395,25 +396,27 @@
         </div>
     </footer>
 
-    <script src="./js/auth.js?v=38" defer></script>
-    <script src="./js/ui.js?v=38" defer></script>
-    <script src="./js/fabric-i18n.js?v=38" defer></script>
-    <script src="./js/look-i18n.js?v=38" defer></script>
-    <script src="./js/export-i18n.js?v=38" defer></script>
-    <script src="./js/dialog.js?v=38" defer></script>
-    <script src="./js/colorpick.js?v=38" defer></script>
-    <script src="./js/fold.js?v=38" defer></script>
-    <script src="./js/i18n.js?v=38" defer></script>
-    <script src="./js/export.js?v=38" defer></script>
-    <script src="./js/select.js?v=38" defer></script>
-    <script src="./js/smartpaste.js?v=38" defer></script>
-    <script src="./js/photos.js?v=38" defer></script>
-    <script src="./js/raskroy-core.js?v=38" defer></script>
-    <script src="./js/raskroy.js?v=38" defer></script>
-    <script src="./js/fabric-core.js?v=38" defer></script>
-    <script src="./js/fabric.js?v=38" defer></script>
-    <script src="./js/look.js?v=38" defer></script>
-    <script src="./js/app.js?v=38" defer></script>
+    <script src="./js/cloud.js?v=39" defer></script>
+    <script src="./js/auth.js?v=39" defer></script>
+    <script src="./js/ui.js?v=39" defer></script>
+    <script src="./js/fabric-i18n.js?v=39" defer></script>
+    <script src="./js/look-i18n.js?v=39" defer></script>
+    <script src="./js/export-i18n.js?v=39" defer></script>
+    <script src="./js/dialog.js?v=39" defer></script>
+    <script src="./js/colorpick.js?v=39" defer></script>
+    <script src="./js/profile.js?v=39" defer></script>
+    <script src="./js/fold.js?v=39" defer></script>
+    <script src="./js/i18n.js?v=39" defer></script>
+    <script src="./js/export.js?v=39" defer></script>
+    <script src="./js/select.js?v=39" defer></script>
+    <script src="./js/smartpaste.js?v=39" defer></script>
+    <script src="./js/photos.js?v=39" defer></script>
+    <script src="./js/raskroy-core.js?v=39" defer></script>
+    <script src="./js/raskroy.js?v=39" defer></script>
+    <script src="./js/fabric-core.js?v=39" defer></script>
+    <script src="./js/fabric.js?v=39" defer></script>
+    <script src="./js/look.js?v=39" defer></script>
+    <script src="./js/app.js?v=39" defer></script>
 </body>
 
 </html>

@@ -266,6 +266,15 @@ if (window.top !== window.self) {
 (function () {
     try {
         var k = '__rk_t'; localStorage.setItem(k, '1'); localStorage.removeItem(k);
+        var cc = window.RK_CLOUD;
+        if (cc && cc.url && cc.key) {
+            /* облачный режим: вошедшим считается тот, у кого есть сохранённый вход и копия профиля */
+            var me = JSON.parse(localStorage.getItem('rk-cloud-me') || 'null'), ss = JSON.parse(localStorage.getItem('rk-cloud-sess') || 'null');
+            var ok = !!(me && ss && me.id && me.id === ss.uid);
+            try { if (ok && localStorage.getItem('rk-cloud-stay') === '0' && !sessionStorage.getItem('rk-cloud-alive')) ok = false; } catch (e2) { /* не страшно */ }
+            if (!ok) document.documentElement.classList.add('rk-locked');
+            return;
+        }
         var o = JSON.parse(localStorage.getItem('rk-users-v1') || 'null');
         var list = o && Array.isArray(o.list) ? o.list : [];
         var sid = null;

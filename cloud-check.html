@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta name="robots" content="noindex">
+<title>Проверка подключения базы</title>
+<style>
+  body { margin: 0; padding: 20px 16px 40px; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f4f6fb; color: #111827; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 16px; color: #4b5563; font-size: 14px; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px 14px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; }
+  li b { display: block; }
+  li span.m { font-size: 14px; color: #4b5563; }
+  .ok .i { color: #15803d; } .bad .i { color: #b91c1c; } .wait .i { color: #6b7280; } .warn .i { color: #b45309; }
+  .i { font-size: 20px; line-height: 1.3; }
+  a.back { display: inline-block; margin-top: 18px; color: #1d4ed8; }
+  button { margin-top: 16px; padding: 12px 18px; border: 0; border-radius: 12px; background: #2563eb; color: #fff; font: 600 16px system-ui, sans-serif; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { body { background: #0b0f1a; color: #e5e7eb; } li { background: #121829; border-color: #263049; } p.sub, li span.m { color: #9ca3af; } a.back { color: #7aa2ff; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Проверка подключения базы</h1>
+  <p class="sub">Показывает, правильно ли настроен Supabase для «Раскрой онлайн». Ничего не меняет и не создаёт.</p>
+  <ul id="out"></ul>
+  <button id="again" type="button">Проверить ещё раз</button><br>
+  <a class="back" href="./index.html">← В приложение</a>
+</main>
+<script src="./js/cloud-config.js"></script>
+<script src="./js/cloud-check.js"></script>
+</body>
+</html>

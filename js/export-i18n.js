@@ -289,3 +289,75 @@
     };
     ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
 })();
+
+/* Облачные профили (версия 39): ключи au.* для базы, переноса работ, синхронизации и блокировки */
+(function () {
+    'use strict';
+    var X = window.RKI18N_EXTRA;
+    var T = {
+        ru: {
+            'au.sub.new.c': 'Придумайте логин и пароль. С ними можно войти на любом устройстве: работы хранятся в облаке и будут везде.',
+            'au.sub.in.c': 'Введите логин и пароль. Ваши работы загрузятся из облака.',
+            'au.sub.del.c': 'Аккаунт «{n}» и все его работы будут удалены из облака и с этого устройства без возможности восстановления. Для подтверждения введите пароль.',
+            'au.note.c': 'Аккаунт и работы хранятся в облаке. Пароль восстановить нельзя, запомните его.',
+            'au.e.pass6': 'Пароль: минимум 6 символов',
+            'au.e.net': 'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.',
+            'au.e.rate': 'Слишком много попыток. Подождите минуту.',
+            'au.e.blocked': 'Этот аккаунт заблокирован администратором.',
+            'au.e.confirm': 'В базе включено подтверждение почты. Отключите «Confirm email» в Supabase (см. SETUP-SUPABASE.txt).',
+            'au.e.closed': 'Регистрация новых аккаунтов отключена.',
+            'au.e.server': 'Ошибка сервера. Попробуйте позже.',
+            'au.title.imp': 'Перенос работ', 'au.sub.imp': 'Введите логин и пароль старого профиля с этого устройства (из версии без облака): его работы добавятся в текущий аккаунт.',
+            'au.btn.imp': 'Перенести', 'au.toast.imp': 'Перенесено работ: {n}',
+            'au.m.edit': 'Мой профиль', 'au.m.admin': 'Админ-панель', 'au.m.import': 'Перенести работы с этого устройства', 'au.m.del.c': 'Удалить аккаунт',
+            'au.sync.conf': 'Работы изменились на другом устройстве, а на этом есть несохранённые правки. Что оставить?',
+            'au.sync.cloud': 'Взять из облака', 'au.sync.mine': 'Оставить мои',
+            'au.sync.newer': 'На другом устройстве работы обновились. Загрузить свежие?', 'au.sync.load': 'Загрузить',
+            'au.sync.wait': 'Загружаем ваши работы…',
+            'au.blocked.title': 'Аккаунт заблокирован', 'au.blocked.sub': 'Администратор ограничил доступ к этому аккаунту. Сохранять работы в облако нельзя.', 'au.blocked.reason': 'Причина: {n}'
+        },
+        en: {
+            'au.sub.new.c': 'Choose a login and a password. Use them on any device: your jobs are kept in the cloud and follow you everywhere.',
+            'au.sub.in.c': 'Enter your login and password. Your jobs will load from the cloud.',
+            'au.sub.del.c': 'The account “{n}” and all its jobs will be deleted from the cloud and from this device for good. Enter your password to confirm.',
+            'au.note.c': 'Your account and jobs are kept in the cloud. The password cannot be recovered, so remember it.',
+            'au.e.pass6': 'Password: at least 6 characters',
+            'au.e.net': 'No connection to the server. Check the internet and try again.',
+            'au.e.rate': 'Too many attempts. Wait a minute.',
+            'au.e.blocked': 'This account has been blocked by the administrator.',
+            'au.e.confirm': 'Email confirmation is on in the database. Turn off “Confirm email” in Supabase (see SETUP-SUPABASE.txt).',
+            'au.e.closed': 'Sign-ups are turned off.',
+            'au.e.server': 'Server error. Try again later.',
+            'au.title.imp': 'Move jobs here', 'au.sub.imp': 'Enter the login and password of the old profile on this device (from the version without the cloud): its jobs will be added to the current account.',
+            'au.btn.imp': 'Move jobs', 'au.toast.imp': 'Jobs moved: {n}',
+            'au.m.edit': 'My profile', 'au.m.admin': 'Admin panel', 'au.m.import': 'Move jobs from this device', 'au.m.del.c': 'Delete account',
+            'au.sync.conf': 'Jobs changed on another device, and this one has unsaved edits. Which to keep?',
+            'au.sync.cloud': 'Use the cloud', 'au.sync.mine': 'Keep mine',
+            'au.sync.newer': 'Jobs were updated on another device. Load the latest?', 'au.sync.load': 'Load',
+            'au.sync.wait': 'Loading your jobs…',
+            'au.blocked.title': 'Account blocked', 'au.blocked.sub': 'The administrator has restricted access to this account. Jobs cannot be saved to the cloud.', 'au.blocked.reason': 'Reason: {n}'
+        },
+        uz: {
+            'au.sub.new.c': 'Login va parol o‘ylab toping. Ular bilan istalgan qurilmadan kirasiz: ishlar bulutda saqlanadi va hamma joyda bo‘ladi.',
+            'au.sub.in.c': 'Login va parolni kiriting. Ishlaringiz bulutdan yuklanadi.',
+            'au.sub.del.c': '«{n}» akkaunti va uning barcha ishlari bulutdan va bu qurilmadan butunlay o‘chiriladi. Tasdiqlash uchun parolni kiriting.',
+            'au.note.c': 'Akkaunt va ishlar bulutda saqlanadi. Parolni tiklab bo‘lmaydi, uni eslab qoling.',
+            'au.e.pass6': 'Parol: kamida 6 belgi',
+            'au.e.net': 'Server bilan aloqa yo‘q. Internetni tekshirib, qayta urinib ko‘ring.',
+            'au.e.rate': 'Urinishlar juda ko‘p. Bir daqiqa kuting.',
+            'au.e.blocked': 'Bu akkaunt administrator tomonidan bloklangan.',
+            'au.e.confirm': 'Bazada pochtani tasdiqlash yoqilgan. Supabase’da «Confirm email» ni o‘chiring (SETUP-SUPABASE.txt).',
+            'au.e.closed': 'Ro‘yxatdan o‘tish o‘chirilgan.',
+            'au.e.server': 'Server xatosi. Keyinroq urinib ko‘ring.',
+            'au.title.imp': 'Ishlarni ko‘chirish', 'au.sub.imp': 'Shu qurilmadagi eski profilning (bulutsiz versiyadan) login va parolini kiriting: uning ishlari joriy akkauntga qo‘shiladi.',
+            'au.btn.imp': 'Ko‘chirish', 'au.toast.imp': 'Ko‘chirilgan ishlar: {n}',
+            'au.m.edit': 'Mening profilim', 'au.m.admin': 'Admin paneli', 'au.m.import': 'Shu qurilmadagi ishlarni ko‘chirish', 'au.m.del.c': 'Akkauntni o‘chirish',
+            'au.sync.conf': 'Ishlar boshqa qurilmada o‘zgargan, bu qurilmada esa saqlanmagan o‘zgarishlar bor. Qaysi birini qoldiramiz?',
+            'au.sync.cloud': 'Bulutdagisini olish', 'au.sync.mine': 'Meniki qolsin',
+            'au.sync.newer': 'Boshqa qurilmada ishlar yangilangan. Yangisini yuklaymizmi?', 'au.sync.load': 'Yuklash',
+            'au.sync.wait': 'Ishlaringiz yuklanmoqda…',
+            'au.blocked.title': 'Akkaunt bloklangan', 'au.blocked.sub': 'Administrator bu akkauntga kirishni cheklagan. Ishlarni bulutga saqlab bo‘lmaydi.', 'au.blocked.reason': 'Sabab: {n}'
+        }
+    };
+    ['ru', 'en', 'uz'].forEach(function (l) { for (var k in T[l]) X[l][k] = T[l][k]; });
+})();

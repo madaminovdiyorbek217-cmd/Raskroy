@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var VERSION = '38';
+    var VERSION = '39';
     var STORE_KEY = 'rk-project-v1';      /* старый ключ: одна работа, переносится в новый */
     var PROJ_KEY = 'rk-projects-v1';      /* все работы и номер активной */
 
@@ -2112,7 +2112,7 @@
     renderTabs();
     updateBar();
 
-    window.RKApp = { slug: slug, importFile: importFile, newWork: newWork, backup: downloadBackup, toast: toast, version: VERSION };
+    window.RKApp = { slug: slug, importFile: importFile, newWork: newWork, backup: downloadBackup, restore: restoreBackup, toast: toast, version: VERSION };
 
     function boot() { run(350); }
     if (window.Raskroy) boot();
