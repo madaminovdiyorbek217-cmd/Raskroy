@@ -61,8 +61,10 @@
             /* «не оставаться в системе»: вход действует, пока открыта вкладка */
             try { if (cur && localStorage.getItem(STK) === '0' && !sessionStorage.getItem('rk-cloud-alive')) cur = null; } catch (e) { /* не страшно */ }
             if (cur && cur.id === '77dbb716-75de-4937-80f1-ff01899a1f76') {
+                /* вход админа действует только после подтверждения Captcha Sentinel (см. verifiedStart);
+                   профиль остаётся выбранным, чтобы приложение при запуске прочитало его локальную копию, а экран закрыт */
                 pendingAdmin = cur;
-                cur = null;
+                document.documentElement.classList.add('rk-locked');
             }
             booting = !!cur;
         } else { var sid0 = getSid(); cur = users.filter(function (u) { return u.id === sid0; })[0] || null; }
@@ -1103,22 +1105,21 @@
 
         document.documentElement.classList.add('rk-locked');
 
-        RKCloud.captchaApproved().then(function (approved) {
-            if (approved) {
-                cur = pendingAdmin;
-                pendingAdmin = null;
-                booting = true;
-            } else {
-                pendingAdmin = null;
-                booting = false;
-                try { localStorage.removeItem(MEK); } catch (e) { noop(); }
-            }
-            start();
-        }).catch(function () {
+        function reject() {
             pendingAdmin = null;
-            booting = false;
             try { localStorage.removeItem(MEK); } catch (e) { noop(); }
+            frozen = true;       /* ничего не сохранять в облако при перезагрузке */
+            location.reload();   /* страница откроется заново уже без входа */
+        }
+        RKCloud.captchaApproved().then(function (approved) {
+            if (!approved) { reject(); return; }
+            pendingAdmin = null;
             start();
+        }).catch(function (e) {
+            /* нет интернета: проверить нечем, но и в облаке без сети ничего не изменить; работаем с локальной копией,
+               а облако и права админа сервер проверит сам, когда связь появится */
+            if (e && (e.code === 'net' || e.status >= 500)) { pendingAdmin = null; start(); return; }
+            reject();
         });
     }
 
