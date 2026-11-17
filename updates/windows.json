@@ -1,1 +1,17 @@
-{"schema":1,"platform":"windows","release":{"tag_name":"windows-v1.0.71","draft":false,"prerelease":false,"assets":[{"name":"Raskroy-Online-Windows-1.0.71.exe","size":108004431,"digest":"sha256:cfcddd23a8b31ccb47c03e3c1b779d4c310eaff8b64dff65803b90d0ded0fc95","browser_download_url":"https://github.com/madaminovdiyorbek217-cmd/Raskroy/releases/download/windows-v1.0.71/Raskroy-Online-Windows-1.0.71.exe"}]}}
+{
+    "platform":  "windows",
+    "schema":  1,
+    "release":  {
+                    "tag_name":  "windows-v2.0.0",
+                    "assets":  [
+                                   {
+                                       "browser_download_url":  "https://github.com/madaminovdiyorbek217-cmd/Raskroy/releases/download/windows-v2.0.0/Raskroy-Online-Windows-2.0.0.exe",
+                                       "name":  "Raskroy-Online-Windows-2.0.0.exe",
+                                       "digest":  "sha256:3c04df4f3fae0adc65db815d21d4e205452916c976104092ecc8bfc9b8e8ec84",
+                                       "size":  102989160
+                                   }
+                               ],
+                    "prerelease":  false,
+                    "draft":  false
+                }
+}
